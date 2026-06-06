@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>VM-Konken · Allstad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Schibsted+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a1610;
+    --ink-2:#0e1f17;
+    --card:#102419;
+    --card-2:#143021;
+    --line:#234536;
+    --text:#eaf6ee;
+    --muted:#7f9d8c;
+    --lime:#2fc46b;        /* Allstad emerald – primary action */
+    --lime-dim:#27a85a;
+    --mint:#8ff08c;        /* Allstad bright mint – highlights */
+    --indigo:#6d6cf1;      /* Allstad periwinkle – secondary accent */
+    --indigo-deep:#2f2f93;
+    --lavender:#d2d0f7;
+    --amber:#6d6cf1;       /* mapped to periwinkle for lock/deadline tags */
+    --red:#ff6b61;
+    --blue:#6d6cf1;
+    --radius:16px;
+    --shadow:0 18px 40px -20px rgba(0,0,0,.85);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Schibsted Grotesk",-apple-system,system-ui,sans-serif;
+    background:var(--ink);
+    color:var(--text);
+    min-height:100vh;
+    line-height:1.45;
+    overflow-x:hidden;
+  }
+  /* atmospheric background */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-2;
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(143,240,140,.10), transparent 60%),
+      radial-gradient(800px 600px at 100% 0%, rgba(109,108,241,.10), transparent 55%),
+      radial-gradient(700px 700px at 50% 120%, rgba(47,196,107,.07), transparent 60%),
+      var(--ink);
+  }
+  body::after{ /* grain */
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:0 16px 120px}
+
+  /* ===== HEADER ===== */
+  header{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  header .pitch{position:absolute;inset:0;opacity:.16;pointer-events:none}
+  header .inner{position:relative;max-width:680px;margin:0 auto;padding:26px 16px 22px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .ball{width:26px;height:26px;border-radius:50%;background:
+      conic-gradient(#fff 0 0) ,#fff;
+      position:relative;flex:none;box-shadow:0 0 0 2px var(--ink) inset}
+  .ball::before{content:"⚽";position:absolute;inset:0;display:grid;place-items:center;font-size:24px;filter:saturate(0) brightness(1.4)}
+  h1{font-family:"Anton",sans-serif;font-weight:400;letter-spacing:.01em;
+     font-size:clamp(34px,9vw,52px);line-height:.92;margin:10px 0 2px;text-transform:uppercase}
+  h1 .hl{color:var(--mint)}
+  .tagline{color:var(--muted);font-size:14px;max-width:42ch}
+  .countdown{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .cd-box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:62px;text-align:center}
+  .cd-box b{font-family:"Anton",sans-serif;font-size:24px;color:var(--mint);display:block;line-height:1}
+  .cd-box span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .cd-label{font-size:12px;color:var(--muted);align-self:center;letter-spacing:.04em}
+
+  .userbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px}
+  .who{display:flex;align-items:center;gap:8px;font-weight:700}
+  .who .dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)}
+  .ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;
+    padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer;font-weight:600}
+  .ghost:hover{border-color:var(--muted);color:var(--text)}
+
+  /* ===== TABS ===== */
+  nav.tabs{position:sticky;top:0;z-index:20;background:rgba(8,11,9,.82);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line)}
+  nav.tabs .inner{max-width:680px;margin:0 auto;display:flex;gap:4px;padding:8px 12px;overflow-x:auto}
+  .tab{flex:1;min-width:max-content;text-align:center;padding:10px 14px;border-radius:11px;border:1px solid transparent;
+    background:transparent;color:var(--muted);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
+  .tab[aria-selected="true"]{background:var(--lime);color:#0a0f06;box-shadow:0 6px 18px -8px var(--lime)}
+
+  /* ===== CARDS / GENERAL ===== */
+  .section-title{font-family:"Anton",sans-serif;font-size:13px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);margin:26px 2px 12px;display:flex;align-items:center;gap:10px}
+  .section-title::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .group-pill{display:inline-flex;align-items:center;gap:8px;font-family:"Anton",sans-serif;
+    font-size:15px;letter-spacing:.1em;color:var(--ink);background:var(--lime);padding:4px 12px;border-radius:999px;text-transform:uppercase}
+  .group-head{display:flex;align-items:center;gap:10px;margin:24px 2px 12px}
+  .group-head .sub{color:var(--muted);font-size:12px}
+
+  .match{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--line);
+    border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow);transition:border-color .2s}
+  .match.locked{opacity:.92}
+  .match .meta{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted);
+    letter-spacing:.04em;margin-bottom:10px}
+  .match .meta .lock{display:inline-flex;gap:5px;align-items:center;color:var(--amber)}
+  .teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;margin-bottom:12px}
+  .team{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15.5px;min-width:0}
+  .team.away{justify-content:flex-end;text-align:right}
+  .team .flag{font-size:22px;line-height:1;flex:none;display:inline-flex}
+  .flagimg{width:25px;height:auto;border-radius:3px;flex:none;vertical-align:middle;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
+  .flag-x{font-size:20px}
+  .team .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vs{font-family:"Anton",sans-serif;color:var(--muted);font-size:13px}
+
+  /* per-tab hero banners */
+  .hero{position:relative;min-height:128px;border-radius:18px;overflow:hidden;margin:18px 0 4px;
+    border:1px solid var(--line);display:flex;align-items:flex-end;padding:16px;
+    background:linear-gradient(135deg,var(--card),var(--card-2))}
+  .hero .art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.30}
+  .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,16,11,.35),rgba(8,16,11,.82));z-index:0}
+  .hero .htext{position:relative;z-index:1}
+  .hero .htext .k{font-family:"Anton",sans-serif;text-transform:uppercase;font-size:clamp(24px,7vw,32px);
+    line-height:.92;color:var(--text);letter-spacing:.01em}
+  .hero .htext .s{color:var(--muted);font-size:12.5px;margin-top:4px}
+  .credits{max-width:680px;margin:34px auto 0;padding:16px 16px 40px;text-align:center;font-size:11px;
+    color:var(--muted);line-height:1.8;border-top:1px solid var(--line)}
+  .credits a{color:var(--muted);text-decoration:underline}
+  .credits a:hover{color:var(--text)}
+
+  .huv{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .pick{appearance:none;border:1px solid var(--line);background:var(--ink-2);color:var(--text);
+    border-radius:12px;padding:10px 6px;font-family:inherit;cursor:pointer;text-align:center;transition:.15s;line-height:1.05}
+  .pick b{font-family:"Anton",sans-serif;font-size:20px;display:block}
+  .pick span{font-size:10.5px;color:var(--muted);letter-spacing:.04em}
+  .pick:hover{border-color:var(--lime-dim)}
+  .pick[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:#0a0f06}
+  .pick[aria-pressed="true"] span{color:#1c2a08}
+  .pick:disabled{cursor:not-allowed;opacity:.55}
+  .pick.correct{outline:2px solid var(--lime);outline-offset:1px}
+  .pick.is-result{border-color:var(--amber)}
+  .result-tag{font-size:11px;color:var(--amber);margin-top:8px;display:flex;gap:6px;align-items:center}
+  .result-tag .pts{margin-left:auto;color:var(--lime);font-weight:800}
+
+  /* ===== AUTH ===== */
+  .auth-screen{min-height:60vh;display:grid;place-items:center;padding:30px 0}
+  .auth-card{width:100%;max-width:380px;background:linear-gradient(180deg,var(--card),var(--card-2));
+    border:1px solid var(--line);border-radius:22px;padding:26px 22px;box-shadow:var(--shadow)}
+  .auth-card h2{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em;
+    font-size:26px;margin:0 0 4px}
+  .auth-card p.s{color:var(--muted);font-size:13.5px;margin:0 0 20px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .field input{width:100%;background:var(--ink-2);border:1px solid var(--line);border-radius:12px;
+    padding:13px 14px;color:var(--text);font-family:inherit;font-size:16px}
+  .field input:focus{outline:none;border-color:var(--lime-dim)}
+  .btn{width:100%;background:var(--lime);color:#0a0f06;border:none;border-radius:12px;padding:14px;
+    font-family:inherit;font-weight:800;font-size:16px;cursor:pointer;transition:.15s}
+  .btn:hover{filter:brightness(1.05)}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .switcher{text-align:center;margin-top:16px;color:var(--muted);font-size:14px}
+  .switcher button{background:none;border:none;color:var(--lime);font-family:inherit;font-weight:700;cursor:pointer;font-size:14px}
+  .err{background:rgba(255,93,82,.12);border:1px solid rgba(255,93,82,.4);color:#ffb3ad;
+    border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:14px}
+
+  /* ===== SPECIALS ===== */
+  .panel{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--line);
+    border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:14px}
+  .panel h3{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;font-size:20px;margin:0 0 4px;letter-spacing:.02em}
+  .panel .hint{color:var(--muted);font-size:13px;margin:0 0 16px}
+  .badge-lock{display:inline-flex;gap:6px;align-items:center;background:rgba(109,108,241,.14);border:1px solid rgba(109,108,241,.45);
+    color:var(--lavender);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;margin-bottom:14px}
+
+  /* ===== LEADERBOARD ===== */
+  .lb-row{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:13px 16px;margin-bottom:9px}
+  .lb-row.me{border-color:var(--lime);background:linear-gradient(90deg,rgba(47,196,107,.10),var(--card))}
+  .lb-pos{font-family:"Anton",sans-serif;font-size:22px;color:var(--muted);width:34px;text-align:center;flex:none}
+  .lb-row.top1 .lb-pos{color:#ffd84d}.lb-row.top2 .lb-pos{color:#d6d6d6}.lb-row.top3 .lb-pos{color:#e09a5a}
+  .lb-name{font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-name .tagme{color:var(--indigo);font-size:11px;font-weight:800;margin-left:6px}
+  .lb-sub{font-size:11.5px;color:var(--muted)}
+  .lb-pts{font-family:"Anton",sans-serif;font-size:26px;color:var(--mint);flex:none}
+  .lb-pts small{font-size:11px;color:var(--muted);font-family:"Schibsted Grotesk";display:block;text-align:right;letter-spacing:.1em}
+  .empty{color:var(--muted);text-align:center;padding:40px 10px;font-size:14px}
+
+  /* ===== ADMIN ===== */
+  .admin-tools .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{background:var(--ink-2);border:none;color:var(--muted);padding:8px 12px;font-family:inherit;font-weight:700;cursor:pointer;font-size:13px}
+  .seg button.on{background:var(--indigo);color:#0a0a1f}
+  .mini{font-size:12px;color:var(--muted)}
+  .chk{display:inline-flex;gap:6px;align-items:center;background:var(--ink-2);border:1px solid var(--line);
+    border-radius:10px;padding:7px 11px;cursor:pointer;font-size:13px;font-weight:600}
+  .chk input{accent-color:var(--lime)}
+  .adm-input{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-family:inherit;font-size:15px}
+
+  /* toast */
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;
+    background:var(--lime);color:#0a0f06;font-weight:800;padding:12px 20px;border-radius:12px;z-index:50;
+    transition:.25s;pointer-events:none;box-shadow:0 12px 30px -10px rgba(0,0,0,.6);font-size:14px}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast.bad{background:var(--red);color:#fff}
+
+  .loading{display:grid;place-items:center;min-height:50vh;color:var(--muted)}
+  .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--lime);border-radius:50%;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .hide{display:none!important}
+  .fade-in{animation:fi .4s ease}
+  @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+  <div id="app">
+    <div class="loading"><div class="spin"></div></div>
+  </div>
+  <div id="toast"></div>
+
+<script>
+/* ============ CONFIG ============ */
+const SB_URL = "https://gqdnxnzpyrmtuumfjofp.supabase.co";
+const SB_KEY = "sb_publishable_J6WoCpu61oelHK8ii76grg_C5xZOWNP";
+
+/* ============ STORAGE (safe) ============ */
+const mem = {};
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return (k in mem)?mem[k]:null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){ delete mem[k]; } }
+};
+
+/* ============ RPC ============ */
+async function rpc(fn, params){
+  const res = await fetch(SB_URL + "/rest/v1/rpc/" + fn, {
+    method:"POST",
+    headers:{ "apikey":SB_KEY, "Authorization":"Bearer "+SB_KEY, "Content-Type":"application/json" },
+    body: JSON.stringify(params||{})
+  });
+  const txt = await res.text();
+  if(!res.ok) throw new Error(txt || ("HTTP "+res.status));
+  return txt ? JSON.parse(txt) : null;
+}
+
+/* ============ FLAGS ============ */
+const FLAG_CC = {
+  "Mexico":"mx","Sør-Afrika":"za","Sør-Korea":"kr","Tsjekkia":"cz","Canada":"ca",
+  "Bosnia-Hercegovina":"ba","USA":"us","Paraguay":"py","Qatar":"qa","Sveits":"ch",
+  "Brasil":"br","Marokko":"ma","Haiti":"ht","Skottland":"gb-sct","Tyskland":"de",
+  "Curaçao":"cw","Nederland":"nl","Japan":"jp","Spania":"es","Kapp Verde":"cv",
+  "Belgia":"be","Egypt":"eg","Saudi-Arabia":"sa","Uruguay":"uy","Norge":"no",
+  "Frankrike":"fr","Senegal":"sn","Irak":"iq","England":"gb-eng","Kroatia":"hr",
+  "Ghana":"gh","Panama":"pa","Argentina":"ar","Australia":"au","Tyrkia":"tr",
+  "Iran":"ir","New Zealand":"nz","Elfenbenskysten":"ci","Portugal":"pt",
+  "Ecuador":"ec","Sverige":"se","Tunisia":"tn","Algerie":"dz","Østerrike":"at",
+  "Jordan":"jo","DR Kongo":"cd","Usbekistan":"uz","Colombia":"co"
+};
+function flag(t){
+  const cc = FLAG_CC[t];
+  if(!cc) return '<span class="flag-x">⚽</span>';
+  return `<img class="flagimg" src="https://flagcdn.com/w40/${cc}.png" srcset="https://flagcdn.com/w80/${cc}.png 2x" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('⚽'))">`;
+}
+
+const ART_PITCH = `<svg class="art" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#8ff08c" stroke-width="1.6"><rect x="24" y="16" width="352" height="108" rx="3"/><line x1="200" y1="16" x2="200" y2="124"/><circle cx="200" cy="70" r="24"/><rect x="24" y="40" width="40" height="60"/><rect x="336" y="40" width="40" height="60"/><rect x="24" y="54" width="16" height="32"/><rect x="360" y="54" width="16" height="32"/></g><circle cx="200" cy="70" r="6" fill="#8ff08c"/></svg>`;
+const ART_TROPHY = `<svg class="art" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#8ff08c" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M168 36 h64 v20 a32 32 0 0 1 -64 0 z"/><path d="M168 42 h-18 a14 14 0 0 0 18 20"/><path d="M232 42 h18 a14 14 0 0 1 -18 20"/><line x1="200" y1="80" x2="200" y2="94"/><path d="M182 94 h36 l-4 12 h-28 z"/><line x1="170" y1="108" x2="230" y2="108"/></g><g fill="#6d6cf1"><circle cx="150" cy="34" r="2.5"/><circle cx="262" cy="52" r="2"/><circle cx="138" cy="82" r="2"/><circle cx="272" cy="96" r="2.5"/></g><path d="M250 28 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 z" fill="#8ff08c"/></svg>`;
+const ART_PODIUM = `<svg class="art" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect x="118" y="74" width="54" height="50" rx="2" fill="#27a85a"/><rect x="173" y="50" width="54" height="74" rx="2" fill="#2fc46b"/><rect x="228" y="90" width="54" height="34" rx="2" fill="#6d6cf1"/><g fill="#0a1610" font-family="Anton, sans-serif" font-size="22" text-anchor="middle"><text x="145" y="106">2</text><text x="200" y="88">1</text><text x="255" y="114">3</text></g><path d="M180 46 L186 32 L200 42 L214 32 L220 46 Z" fill="#8ff08c"/></svg>`;
+const HERO = {
+  kamper:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Maradona_shilton_mano_dios.jpg/1280px-Maradona_shilton_mano_dios.jpg", k:"Kampene", s:"Tipp H, U eller B – du kan endre helt til avspark"},
+  bonus:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Germany_champions_2014_FIFA_World_Cup.jpg/1280px-Germany_champions_2014_FIFA_World_Cup.jpg", k:"Bonustips", s:"Toppscorer & VM-vinner · 5 poeng hver"},
+  tabell:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Norway_Italy_-_June_2025_C_46.jpg/1280px-Norway_Italy_-_June_2025_C_46.jpg", k:"Tabellen", s:"Hvem troner øverst?"}
+};
+function heroBanner(kind){
+  const h=HERO[kind]; if(!h) return "";
+  const bg = h.photo ? `<img class="art" src="${h.photo}" alt="" loading="lazy" onerror="this.style.display='none'">` : (h.art||"");
+  return `<div class="hero">${bg}<div class="htext"><div class="k">${h.k}</div><div class="s">${h.s}</div></div></div>`;
+}
+
+const STAGE_NAMES = {group:"Gruppespill",r32:"16-delsfinale (32)",r16:"Åttedelsfinale",qf:"Kvartfinale",sf:"Semifinale",final:"Finale"};
+const ALL_STAGES = ["group","r32","r16","qf","sf","final"];
+
+/* ============ STATE ============ */
+let S = null;        // server state
+let token = store.get("vmt_token");
+let view = "kamper";
+let authMode = "login";
+let adminPin = null; // kept in memory only
+let adminUsers = null; // loaded after admin login
+
+/* ============ HELPERS ============ */
+const $ = sel => document.querySelector(sel);
+function toast(msg, bad){
+  const t = $("#toast"); t.textContent = msg; t.className = "show" + (bad?" bad":"");
+  clearTimeout(t._t); t._t = setTimeout(()=>{ t.className=""; }, 2600);
+}
+function fmtDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleString("nb-NO",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+}
+function nowMs(){ return S ? new Date(S.now).getTime() : Date.now(); }
+function isLocked(m){
+  if(m.finished) return true;
+  if(!S.open_stages.includes(m.stage)) return true;
+  return new Date(m.kickoff).getTime() <= nowMs();
+}
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+async function loadState(){
+  S = await rpc("get_state", { p_token: token || null });
+  if(token && !S.me){ token=null; store.del("vmt_token"); } // stale token
+}
+
+/* ============ RENDER ============ */
+function render(){
+  const app = $("#app");
+  if(!S){ app.innerHTML = '<div class="loading"><div class="spin"></div></div>'; return; }
+  if(!S.me){ app.innerHTML = authView(); bindAuth(); return; }
+  app.innerHTML = headerView() + tabsView() + '<main class="wrap fade-in" id="main"></main>' + footerView();
+  bindHeader(); bindTabs(); renderMain();
+}
+function footerView(){
+  return `<footer class="credits">
+    Toppbilder via Wikimedia Commons:
+    <a href="https://commons.wikimedia.org/wiki/File:Maradona_shilton_mano_dios.jpg" target="_blank" rel="noopener">Maradona, 1986 (public domain)</a> ·
+    <a href="https://commons.wikimedia.org/wiki/File:Germany_champions_2014_FIFA_World_Cup.jpg" target="_blank" rel="noopener">Tyskland 2014 (CC BY-SA)</a> ·
+    <a href="https://commons.wikimedia.org/wiki/File:Norway_Italy_-_June_2025_C_46.jpg" target="_blank" rel="noopener">Norge–Italia 2025 (CC BY-SA)</a>
+  </footer>`;
+}
+
+function headerView(){
+  return `<header>
+    <div class="inner">
+      <div class="brand"><span class="ball"></span><span style="font-weight:800;letter-spacing:.18em;font-size:12px;text-transform:uppercase;color:var(--muted)">Allstad</span></div>
+      <h1>VM-<span class="hl">Konken</span></h1>
+      <div class="tagline">Tippekonkurranse for Allstad for VM 2026</div>
+      ${countdownView()}
+      <div class="userbar">
+        <div class="who"><span class="dot"></span>${esc(S.me.username)}</div>
+        <button class="ghost" id="logout">Logg ut</button>
+      </div>
+    </div>
+  </header>`;
+}
+function countdownView(){
+  const diff = new Date(S.tournament_start).getTime() - nowMs();
+  if(diff <= 0) return `<div class="countdown"><span class="cd-label">⚽ VM er i gang!</span></div>`;
+  const d = Math.floor(diff/864e5), h=Math.floor(diff%864e5/36e5), m=Math.floor(diff%36e5/6e4);
+  return `<div class="countdown">
+    <div class="cd-box"><b>${d}</b><span>dager</span></div>
+    <div class="cd-box"><b>${h}</b><span>timer</span></div>
+    <div class="cd-box"><b>${m}</b><span>min</span></div>
+    <span class="cd-label">til avspark</span>
+  </div>`;
+}
+function tabsView(){
+  const tabs = [["kamper","Kamper"],["bonus","Bonustips"],["tabell","Tabell"],["admin","Admin"]];
+  return `<nav class="tabs"><div class="inner">${tabs.map(([k,l])=>
+    `<button class="tab" role="tab" data-tab="${k}" aria-selected="${view===k}">${l}</button>`).join("")}</div></nav>`;
+}
+
+function renderMain(){
+  const main = $("#main"); if(!main) return;
+  main.classList.remove("fade-in"); void main.offsetWidth; main.classList.add("fade-in");
+  if(view==="kamper") main.innerHTML = matchesView();
+  else if(view==="bonus") main.innerHTML = bonusView();
+  else if(view==="tabell") main.innerHTML = tabellView();
+  else if(view==="admin") main.innerHTML = adminView();
+  bindMain();
+}
+
+function matchesView(){
+  const groups = {};
+  (S.matches||[]).filter(m=>m.stage==="group").forEach(m=>{ (groups[m.group_letter]=groups[m.group_letter]||[]).push(m); });
+  const ko = (S.matches||[]).filter(m=>m.stage!=="group");
+  const letters = Object.keys(groups).sort();
+  if(!letters.length && !ko.length) return heroBanner("kamper") + `<div class="empty">Ingen kamper er lagt inn ennå.</div>`;
+  let html = heroBanner("kamper");
+  letters.forEach(L=>{
+    html += `<div class="group-head"><span class="group-pill">Gruppe ${L}</span></div>`;
+    groups[L].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
+    html += groups[L].map(matchCard).join("");
+  });
+  if(ko.length){
+    ALL_STAGES.filter(s=>s!=="group").forEach(st=>{
+      const ms = ko.filter(m=>m.stage===st); if(!ms.length) return;
+      html += `<div class="section-title">${STAGE_NAMES[st]}</div>`;
+      html += ms.map(matchCard).join("");
+    });
+  }
+  return html;
+}
+
+function matchCard(m){
+  const locked = isLocked(m);
+  const myPick = S.me.picks[String(m.id)] || null;
+  const isGroup = m.stage==="group";
+  const opts = isGroup
+    ? [["H","Hjemme"],["U","Uavgjort"],["B","Borte"]]
+    : [["home","Videre"],["away","Videre"]]; // knockout: pick advancing team handled below
+  let controls;
+  if(isGroup){
+    controls = `<div class="huv">` + opts.map(([v,lab])=>{
+      const sel = myPick===v;
+      const isRes = m.finished && m.result===v;
+      const correct = m.finished && myPick===v && m.result===v;
+      return `<button class="pick${sel?'':''}${isRes?' is-result':''}${correct?' correct':''}" data-mid="${m.id}" data-pick="${v}"
+        aria-pressed="${sel}" ${locked?"disabled":""}><b>${v}</b><span>${lab}</span></button>`;
+    }).join("") + `</div>`;
+  } else {
+    // knockout: two buttons = the two teams
+    const mk = (val,team)=>{
+      const sel = myPick===val; const isRes=m.finished&&m.result===val; const correct=m.finished&&myPick===val&&m.result===val;
+      return `<button class="pick${isRes?' is-result':''}${correct?' correct':''}" data-mid="${m.id}" data-pick="${val}"
+        aria-pressed="${sel}" ${locked?"disabled":""}><b style="font-size:14px">${flag(team)}</b><span>${esc(team)}</span></button>`;
+    };
+    controls = `<div class="huv" style="grid-template-columns:1fr 1fr">${mk("home",m.home_team)}${mk("away",m.away_team)}</div>`;
+  }
+  let resultTag = "";
+  if(m.finished){
+    const won = m.result==="H"?m.home_team:m.result==="B"?m.away_team:m.result==="U"?"Uavgjort":m.result==="home"?m.home_team:m.away_team;
+    const got = (myPick && myPick===m.result);
+    resultTag = `<div class="result-tag">✓ Fasit: <b style="color:var(--text)">${esc(isGroup&&m.result==="U"?"Uavgjort":won)}</b>
+      <span class="pts">${got?("+"+m.points_value+" p"):"0 p"}</span></div>`;
+  }
+  return `<div class="match ${locked?'locked':''}">
+    <div class="meta">
+      <span>${fmtDate(m.kickoff)}</span>
+      ${locked && !m.finished ? '<span class="lock">🔒 Låst</span>' : (m.points_value>1?`<span>${m.points_value} poeng</span>`:'')}
+    </div>
+    <div class="teams">
+      <div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div>
+      <div class="vs">VS</div>
+      <div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div>
+    </div>
+    ${controls}
+    ${resultTag}
+  </div>`;
+}
+
+function bonusView(){
+  const locked = S.specials_locked;
+  const sp = S.me.specials || {top_scorer:null,champion:null};
+  return heroBanner("bonus") + `
+  ${locked?`<div class="badge-lock">🔒 Fristen er passert – tipsene er låst</div>`
+          :`<div class="badge-lock" style="background:rgba(47,196,107,.12);border-color:rgba(47,196,107,.45);color:var(--mint)">⏱ Frist: avspark 11. juni</div>`}
+  <div class="panel">
+    <h3>⚽ Toppscorer</h3>
+    <p class="hint">Hvem blir VM-toppscorer? Riktig svar gir <b style="color:var(--lime)">5 poeng</b>.</p>
+    <div class="field"><input id="sc-scorer" placeholder="F.eks. Erling Haaland" value="${esc(sp.top_scorer||"")}" ${locked?"disabled":""}></div>
+  </div>
+  <div class="panel">
+    <h3>🏆 VM-vinner</h3>
+    <p class="hint">Hvilket land løfter pokalen? Riktig svar gir <b style="color:var(--lime)">5 poeng</b>.</p>
+    <div class="field"><input id="sc-champ" placeholder="F.eks. Frankrike" value="${esc(sp.champion||"")}" ${locked?"disabled":""}></div>
+  </div>
+  ${locked?"":`<button class="btn" id="save-bonus">Lagre bonustips</button>`}`;
+}
+
+function tabellView(){
+  const lb = S.leaderboard || [];
+  if(!lb.length) return heroBanner("tabell") + `<div class="empty">Ingen poeng ennå – tabellen fylles når kampene er ferdig.</div>`;
+  return heroBanner("tabell") + `<div class="section-title">Stillingen</div>` + lb.map((r,i)=>{
+    const me = r.username===S.me.username;
+    const top = i<3?` top${i+1}`:"";
+    return `<div class="lb-row${me?' me':''}${top}">
+      <div class="lb-pos">${i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div class="lb-name">${esc(r.username)}${me?'<span class="tagme">DEG</span>':''}</div>
+        <div class="lb-sub">${r.correct} riktige tips</div>
+      </div>
+      <div class="lb-pts">${r.total_points}<small>POENG</small></div>
+    </div>`;
+  }).join("");
+}
+
+/* ============ ADMIN ============ */
+function adminView(){
+  if(!adminPin){
+    return `<div class="panel" style="max-width:420px;margin:30px auto">
+      <h3>🔐 Adminside</h3>
+      <p class="hint">Skriv inn admin-PIN for å registrere resultater og styre rundene.</p>
+      <div id="adm-err"></div>
+      <div class="field"><input id="adm-pin" type="password" inputmode="numeric" placeholder="Admin-PIN"></div>
+      <button class="btn" id="adm-login">Logg inn som admin</button>
+    </div>`;
+  }
+  const matches = S.matches||[];
+  const stagesOpen = S.open_stages||[];
+  return `
+  <div class="section-title">Innstillinger</div>
+  <div class="panel admin-tools">
+    <p class="hint">Åpne eller lukk tipping per runde. Tips låses uansett automatisk ved avspark.</p>
+    <div class="row">${ALL_STAGES.map(st=>`
+      <label class="chk"><input type="checkbox" data-stage="${st}" ${stagesOpen.includes(st)?"checked":""}> ${STAGE_NAMES[st]}</label>`).join("")}</div>
+    <div class="row" style="margin-top:6px">
+      <label class="chk"><input type="checkbox" id="lock-sp" ${S.specials_locked?"checked":""}> Lås bonustips (toppscorer/vinner)</label>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <input class="adm-input" id="np" type="password" placeholder="Ny admin-PIN" style="flex:1">
+      <button class="ghost" id="change-pin">Bytt PIN</button>
+    </div>
+  </div>
+
+  <div class="section-title">Brukere</div>
+  <div class="panel admin-tools">
+    <p class="hint">Se hvem som er med, nullstill PIN for noen som har glemt sin, eller slett test-/feilbrukere.</p>
+    ${adminUsers===null ? '<div class="mini">Laster…</div>'
+      : (adminUsers.length===0 ? '<div class="mini">Ingen brukere registrert ennå.</div>'
+      : adminUsers.map(u=>`
+      <div class="user-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap">
+        <div style="min-width:0"><b>${esc(u.username)}</b> <span class="mini">· ${u.picks} tips</span></div>
+        <div class="row" style="margin:0;gap:6px">
+          <input class="adm-input" placeholder="Ny PIN" inputmode="numeric" style="width:92px">
+          <button class="ghost" data-reset="${esc(u.username)}">Nullstill</button>
+          <button class="ghost" data-del="${esc(u.username)}" style="border-color:rgba(255,107,97,.4);color:var(--red)">Slett</button>
+        </div>
+      </div>`).join(''))}
+  </div>
+
+  <div class="section-title">Fasit: bonus</div>
+  <div class="panel admin-tools">
+    <div class="row"><input class="adm-input" id="fa-scorer" placeholder="Toppscorer (fasit)" style="flex:1" value="${esc(S._sr_scorer||"")}"></div>
+    <div class="row"><input class="adm-input" id="fa-champ" placeholder="VM-vinner (fasit)" style="flex:1" value="${esc(S._sr_champ||"")}"></div>
+    <button class="ghost" id="save-fasit">Lagre fasit</button>
+  </div>
+
+  <div class="section-title">Registrer resultater</div>
+  ${matches.length?matches.map(m=>{
+    const isGroup=m.stage==="group";
+    const cur=m.result;
+    const opts = isGroup?[["H","H"],["U","U"],["B","B"]]:[["home",m.home_team],["away",m.away_team]];
+    return `<div class="match">
+      <div class="meta"><span>${STAGE_NAMES[m.stage]}${m.group_letter?(" · Gr. "+m.group_letter):""} · ${fmtDate(m.kickoff)}</span>${m.finished?'<span style="color:var(--lime)">✓ ferdig</span>':''}</div>
+      <div class="teams"><div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div><div class="vs">VS</div><div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div></div>
+      <div class="seg" role="group">
+        ${opts.map(([v,lab])=>`<button data-res="${v}" data-mid="${m.id}" class="${cur===v?'on':''}">${esc(lab)}</button>`).join("")}
+        <button data-res="" data-mid="${m.id}" class="${!cur?'on':''}">–</button>
+      </div>
+    </div>`;
+  }).join(""):'<div class="empty">Ingen kamper lagt inn.</div>'}`;
+}
+
+/* ============ BINDINGS ============ */
+function bindHeader(){
+  const lo=$("#logout"); if(lo) lo.onclick=()=>{ token=null; store.del("vmt_token"); adminPin=null; loadAndRender(); };
+}
+function bindTabs(){
+  document.querySelectorAll(".tab").forEach(b=> b.onclick=()=>{ view=b.dataset.tab; document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected", x.dataset.tab===view)); renderMain(); });
+}
+function bindMain(){
+  // group / knockout picks
+  document.querySelectorAll(".pick:not([disabled])").forEach(b=> b.onclick=async()=>{
+    const mid=+b.dataset.mid, pick=b.dataset.pick;
+    const prev = S.me.picks[String(mid)];
+    S.me.picks[String(mid)] = (prev===pick? prev : pick); // optimistic
+    renderMain();
+    try{ const r=await rpc("save_pick",{p_token:token,p_match_id:mid,p_pick:pick});
+      if(!r.ok){ throw new Error(r.error); } toast("Tips lagret ✓");
+    }catch(e){ S.me.picks[String(mid)]=prev; renderMain(); toast(cleanErr(e),true); }
+  });
+  // bonus
+  const sb=$("#save-bonus"); if(sb) sb.onclick=async()=>{
+    sb.disabled=true;
+    try{ const r=await rpc("save_specials",{p_token:token,p_top_scorer:$("#sc-scorer").value,p_champion:$("#sc-champ").value});
+      if(!r.ok) throw new Error(r.error); toast("Bonustips lagret ✓"); await loadState();
+    }catch(e){ toast(cleanErr(e),true);} sb.disabled=false; renderMain();
+  };
+  // admin
+  bindAdmin();
+}
+function bindAdmin(){
+  const al=$("#adm-login"); if(al) al.onclick=async()=>{
+    const pin=$("#adm-pin").value;
+    try{ const r=await rpc("admin_set_open_stages",{p_admin_pin:pin,p_stages:S.open_stages});
+      if(!r.ok){ $("#adm-err").innerHTML='<div class="err">'+esc(r.error)+'</div>'; return; }
+      adminPin=pin; await loadAdminUsers(); renderMain(); toast("Innlogget som admin ✓");
+    }catch(e){ $("#adm-err").innerHTML='<div class="err">'+esc(cleanErr(e))+'</div>'; }
+  };
+  if(!adminPin) return;
+  // open stages
+  document.querySelectorAll('[data-stage]').forEach(c=> c.onchange=async()=>{
+    const stages=[...document.querySelectorAll('[data-stage]:checked')].map(x=>x.dataset.stage);
+    const r=await rpc("admin_set_open_stages",{p_admin_pin:adminPin,p_stages:stages});
+    if(r.ok){ S.open_stages=stages; toast("Lagret ✓"); } else toast(r.error,true);
+  });
+  const ls=$("#lock-sp"); if(ls) ls.onchange=async()=>{
+    const r=await rpc("admin_lock_specials",{p_admin_pin:adminPin,p_locked:ls.checked});
+    if(r.ok){ toast("Lagret ✓"); await loadState(); renderMain(); } else toast(r.error,true);
+  };
+  const cp=$("#change-pin"); if(cp) cp.onclick=async()=>{
+    const np=$("#np").value; const r=await rpc("admin_change_pin",{p_admin_pin:adminPin,p_new_pin:np});
+    if(r.ok){ adminPin=np; toast("Admin-PIN endret ✓"); } else toast(r.error,true);
+  };
+  const sf=$("#save-fasit"); if(sf) sf.onclick=async()=>{
+    const r=await rpc("admin_set_specials_result",{p_admin_pin:adminPin,p_top_scorer:$("#fa-scorer").value,p_champion:$("#fa-champ").value});
+    if(r.ok){ S._sr_scorer=$("#fa-scorer").value; S._sr_champ=$("#fa-champ").value; toast("Fasit lagret ✓"); await loadState(); } else toast(r.error,true);
+  };
+  document.querySelectorAll('[data-res]').forEach(b=> b.onclick=async()=>{
+    const mid=+b.dataset.mid, res=b.dataset.res;
+    try{
+      const r = res==="" ? await rpc("admin_clear_result",{p_admin_pin:adminPin,p_match_id:mid})
+                         : await rpc("admin_set_result",{p_admin_pin:adminPin,p_match_id:mid,p_result:res});
+      if(!r.ok) throw new Error(r.error);
+      toast("Resultat lagret ✓"); await loadState(); renderMain();
+    }catch(e){ toast(cleanErr(e),true); }
+  });
+  // reset PIN
+  document.querySelectorAll('[data-reset]').forEach(b=> b.onclick=async()=>{
+    const uname=b.dataset.reset;
+    const inp=b.closest('.user-row').querySelector('input');
+    const np=inp?inp.value.trim():'';
+    if(np.length<4){ toast("Ny PIN må ha minst 4 sifre",true); return; }
+    const r=await rpc("admin_reset_pin",{p_admin_pin:adminPin,p_username:uname,p_new_pin:np});
+    if(r.ok){ if(inp) inp.value=''; toast("Ny PIN satt for "+uname+" ✓"); } else toast(cleanErr(new Error(r.error)),true);
+  });
+  // delete user
+  document.querySelectorAll('[data-del]').forEach(b=> b.onclick=async()=>{
+    const uname=b.dataset.del;
+    if(!confirm('Slette brukeren "'+uname+'"? Alle tipsene deres forsvinner. Dette kan ikke angres.')) return;
+    const r=await rpc("admin_delete_user",{p_admin_pin:adminPin,p_username:uname});
+    if(r.ok){ toast(uname+" slettet"); await loadAdminUsers(); await loadState(); renderMain(); } else toast(cleanErr(new Error(r.error)),true);
+  });
+}
+
+async function loadAdminUsers(){
+  try{ const r=await rpc("admin_list_users",{p_admin_pin:adminPin}); adminUsers = (r&&r.ok)? r.users : []; }
+  catch(e){ adminUsers=[]; }
+}
+
+/* ============ AUTH ============ */
+function authView(){
+  return `<div class="wrap"><header style="border:none"><div class="inner" style="text-align:center">
+      <h1 style="margin-top:6px">VM-<span class="hl">Konken</span></h1>
+      <div class="tagline" style="margin:0 auto">Tippekonkurranse for Allstad for VM 2026 🇺🇸🇨🇦🇲🇽</div>
+    </div></header>
+    <div class="auth-screen"><div class="auth-card">
+      <h2>${authMode==="login"?"Logg inn":"Lag bruker"}</h2>
+      <p class="s">${authMode==="login"?"Velkommen tilbake! Skriv inn brukernavn og PIN.":"Velg et brukernavn og en PIN-kode (minst 4 siffer). Husk PIN-en – den er nøkkelen din."}</p>
+      <div id="auth-err"></div>
+      <div class="field"><label>Brukernavn</label><input id="au-name" autocomplete="username" placeholder="ola_nordmann"></div>
+      <div class="field"><label>PIN-kode</label><input id="au-pin" type="password" inputmode="numeric" autocomplete="${authMode==="login"?"current-password":"new-password"}" placeholder="••••"></div>
+      <button class="btn" id="au-go">${authMode==="login"?"Logg inn":"Opprett bruker"}</button>
+      <div class="switcher">${authMode==="login"?"Ny her?":"Har du bruker?"}
+        <button id="au-switch">${authMode==="login"?"Lag bruker":"Logg inn"}</button></div>
+    </div></div></div>`;
+}
+function bindAuth(){
+  $("#au-switch").onclick=()=>{ authMode=authMode==="login"?"register":"login"; render(); };
+  const go=$("#au-go");
+  const submit=async()=>{
+    const name=$("#au-name").value.trim(), pin=$("#au-pin").value;
+    if(!name||!pin){ $("#auth-err").innerHTML='<div class="err">Fyll inn både brukernavn og PIN.</div>'; return; }
+    go.disabled=true; go.textContent="Et øyeblikk…";
+    try{
+      const r=await rpc(authMode==="login"?"login":"register",{p_username:name,p_pin:pin});
+      if(!r.ok){ $("#auth-err").innerHTML='<div class="err">'+esc(r.error)+'</div>'; go.disabled=false; go.textContent=authMode==="login"?"Logg inn":"Opprett bruker"; return; }
+      token=r.token; store.set("vmt_token",token); view="kamper"; await loadAndRender();
+      toast("Hei, "+r.username+"! 👋");
+    }catch(e){ $("#auth-err").innerHTML='<div class="err">'+esc(cleanErr(e))+'</div>'; go.disabled=false; go.textContent=authMode==="login"?"Logg inn":"Opprett bruker"; }
+  };
+  go.onclick=submit;
+  $("#au-pin").addEventListener("keydown",e=>{ if(e.key==="Enter") submit(); });
+}
+
+async function loadFasit(){
+  // best-effort: read current special results via a tiny admin-less peek is not exposed; keep blank unless set this session
+}
+function cleanErr(e){
+  const m=(e&&e.message)||String(e);
+  if(/Failed to fetch|NetworkError/i.test(m)) return "Nettverksfeil – sjekk internett og prøv igjen.";
+  try{ const j=JSON.parse(m); if(j.message) return j.message; }catch(_){}
+  return m.length>120? "Noe gikk galt. Prøv igjen." : m;
+}
+
+/* ============ BOOT ============ */
+async function loadAndRender(){ try{ await loadState(); render(); }catch(e){ $("#app").innerHTML='<div class="empty">Kunne ikke laste data: '+esc(cleanErr(e))+'</div>'; } }
+loadAndRender();
+setInterval(()=>{ if(S&&S.me){ const c=document.querySelector(".countdown"); if(c) c.outerHTML=countdownView(); } }, 30000);
+</script>
+</body>
+</html>
