@@ -54,9 +54,12 @@
   .wrap{max-width:680px;margin:0 auto;padding:0 16px 120px}
 
   /* ===== HEADER ===== */
-  header{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);min-height:200px}
   header .pitch{position:absolute;inset:0;opacity:.16;pointer-events:none}
-  header .inner{position:relative;max-width:680px;margin:0 auto;padding:26px 16px 22px}
+  .header-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:.22;z-index:0}
+  header::after{content:"";position:absolute;inset:0;z-index:0;
+    background:linear-gradient(180deg,rgba(8,16,11,.5),rgba(8,16,11,.88))}
+  header .inner{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:26px 16px 22px}
   .brand{display:flex;align-items:center;gap:10px}
   .ball{width:26px;height:26px;border-radius:50%;background:
       conic-gradient(#fff 0 0) ,#fff;
@@ -263,10 +266,16 @@ const ART_PITCH = `<svg class="art" viewBox="0 0 400 140" preserveAspectRatio="x
 const ART_TROPHY = `<svg class="art" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#8ff08c" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M168 36 h64 v20 a32 32 0 0 1 -64 0 z"/><path d="M168 42 h-18 a14 14 0 0 0 18 20"/><path d="M232 42 h18 a14 14 0 0 1 -18 20"/><line x1="200" y1="80" x2="200" y2="94"/><path d="M182 94 h36 l-4 12 h-28 z"/><line x1="170" y1="108" x2="230" y2="108"/></g><g fill="#6d6cf1"><circle cx="150" cy="34" r="2.5"/><circle cx="262" cy="52" r="2"/><circle cx="138" cy="82" r="2"/><circle cx="272" cy="96" r="2.5"/></g><path d="M250 28 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 z" fill="#8ff08c"/></svg>`;
 const ART_PODIUM = `<svg class="art" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect x="118" y="74" width="54" height="50" rx="2" fill="#27a85a"/><rect x="173" y="50" width="54" height="74" rx="2" fill="#2fc46b"/><rect x="228" y="90" width="54" height="34" rx="2" fill="#6d6cf1"/><g fill="#0a1610" font-family="Anton, sans-serif" font-size="22" text-anchor="middle"><text x="145" y="106">2</text><text x="200" y="88">1</text><text x="255" y="114">3</text></g><path d="M180 46 L186 32 L200 42 L214 32 L220 46 Z" fill="#8ff08c"/></svg>`;
 const HERO = {
-  kamper:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Maradona_shilton_mano_dios.jpg/1280px-Maradona_shilton_mano_dios.jpg", k:"Kampene", s:"Tipp H, U eller B – du kan endre helt til avspark"},
-  bonus:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Germany_champions_2014_FIFA_World_Cup.jpg/1280px-Germany_champions_2014_FIFA_World_Cup.jpg", k:"Bonustips", s:"Toppscorer & VM-vinner · 5 poeng hver"},
-  tabell:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Norway_Italy_-_June_2025_C_46.jpg/1280px-Norway_Italy_-_June_2025_C_46.jpg", k:"Tabellen", s:"Hvem troner øverst?"}
+  kamper:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Uruguay_-_Costa_Rica_FIFA_World_Cup_2014_(23).jpg/1280px-Uruguay_-_Costa_Rica_FIFA_World_Cup_2014_(23).jpg", k:"Kampene", s:"Tipp H, U eller B – du kan endre helt til avspark"},
+  bonus:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/2022_FIFA_World_Cup_England_6%E2%80%932_Iran_-_(4).jpg/1280px-2022_FIFA_World_Cup_England_6%E2%80%932_Iran_-_(4).jpg", k:"Bonustips", s:"Toppscorer & VM-vinner · 5 poeng hver"},
+  tabell:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/The_opening_ceremony_of_the_FIFA_World_Cup_2014_01.jpg/1280px-The_opening_ceremony_of_the_FIFA_World_Cup_2014_01.jpg", k:"Tabellen", s:"Hvem troner øverst?"}
 };
+const HEADER_IMG = {
+  kamper:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Maradona_shilton_mano_dios.jpg/1280px-Maradona_shilton_mano_dios.jpg",
+  bonus:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Germany_champions_2014_FIFA_World_Cup.jpg/1280px-Germany_champions_2014_FIFA_World_Cup.jpg",
+  tabell:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Norway_Italy_-_June_2025_C_46.jpg/1280px-Norway_Italy_-_June_2025_C_46.jpg"
+};
+function setHeaderBg(){ const el=document.getElementById("hbg"); if(!el) return; el.src = HEADER_IMG[view] || HEADER_IMG.kamper; el.style.display=""; }
 function heroBanner(kind){
   const h=HERO[kind]; if(!h) return "";
   const bg = h.photo ? `<img class="art" src="${h.photo}" alt="" loading="lazy" onerror="this.style.display='none'">` : (h.art||"");
@@ -317,15 +326,19 @@ function render(){
 }
 function footerView(){
   return `<footer class="credits">
-    Toppbilder via Wikimedia Commons:
-    <a href="https://commons.wikimedia.org/wiki/File:Maradona_shilton_mano_dios.jpg" target="_blank" rel="noopener">Maradona, 1986 (public domain)</a> ·
+    Bilder via Wikimedia Commons:
+    <a href="https://commons.wikimedia.org/wiki/File:Maradona_shilton_mano_dios.jpg" target="_blank" rel="noopener">Maradona 1986 (PD)</a> ·
     <a href="https://commons.wikimedia.org/wiki/File:Germany_champions_2014_FIFA_World_Cup.jpg" target="_blank" rel="noopener">Tyskland 2014 (CC BY-SA)</a> ·
-    <a href="https://commons.wikimedia.org/wiki/File:Norway_Italy_-_June_2025_C_46.jpg" target="_blank" rel="noopener">Norge–Italia 2025 (CC BY-SA)</a>
+    <a href="https://commons.wikimedia.org/wiki/File:Norway_Italy_-_June_2025_C_46.jpg" target="_blank" rel="noopener">Norge–Italia 2025 (CC BY-SA)</a> ·
+    <a href="https://commons.wikimedia.org/wiki/File:Uruguay_-_Costa_Rica_FIFA_World_Cup_2014_(23).jpg" target="_blank" rel="noopener">Uruguay–Costa Rica 2014 (CC BY-SA)</a> ·
+    <a href="https://commons.wikimedia.org/wiki/File:2022_FIFA_World_Cup_England_6%E2%80%932_Iran_-_(4).jpg" target="_blank" rel="noopener">England–Iran 2022 (CC BY)</a> ·
+    <a href="https://commons.wikimedia.org/wiki/File:The_opening_ceremony_of_the_FIFA_World_Cup_2014_01.jpg" target="_blank" rel="noopener">Åpningsseremoni 2014 (CC BY-SA)</a>
   </footer>`;
 }
 
 function headerView(){
   return `<header>
+    <img class="header-bg" id="hbg" alt="" onerror="this.style.display='none'">
     <div class="inner">
       <div class="brand"><span class="ball"></span><span style="font-weight:800;letter-spacing:.18em;font-size:12px;text-transform:uppercase;color:var(--muted)">Allstad</span></div>
       <h1>VM-<span class="hl">Konken</span></h1>
@@ -362,6 +375,7 @@ function renderMain(){
   else if(view==="bonus") main.innerHTML = bonusView();
   else if(view==="tabell") main.innerHTML = tabellView();
   else if(view==="admin") main.innerHTML = adminView();
+  setHeaderBg();
   bindMain();
 }
 
@@ -660,7 +674,7 @@ function bindAuth(){
 }
 
 async function loadFasit(){
-  // best-effort: read current special results via a tiny admin-less peek is not exposed; keep blank unless set this session
+  // best-effort placeholder
 }
 function cleanErr(e){
   const m=(e&&e.message)||String(e);
