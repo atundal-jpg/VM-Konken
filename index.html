@@ -103,6 +103,10 @@
   .credits a{color:var(--muted);text-decoration:underline}
   .credits a:hover{color:var(--text)}
   .picks-summary{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  .date-header{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:22px 2px 8px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .older-toggle{width:100%;background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:12px 16px;color:var(--muted);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;text-align:left;margin:16px 0 4px;display:block}
+  .older-toggle:hover{color:var(--text);border-color:var(--muted)}
+  .group-badge{background:rgba(47,196,107,.12);color:var(--lime);border-radius:5px;padding:1px 6px;font-size:10.5px;font-weight:800;letter-spacing:.05em;white-space:nowrap}
   .pcnt{font-size:11.5px;font-weight:800;padding:4px 9px;border-radius:8px}
   .pcnt-H{background:rgba(47,196,107,.15);color:var(--lime)}
   .pcnt-U{background:rgba(109,108,241,.15);color:var(--indigo)}
@@ -287,13 +291,32 @@ function renderMain(){
   else if(view==="admin") main.innerHTML=adminView();
   setHeaderBg(); bindMain();
 }
+function fmtDay(iso){
+  const d=new Date(iso),n=nowMs();
+  if(d.toDateString()===new Date(n).toDateString()) return "I dag";
+  if(d.toDateString()===new Date(n-864e5).toDateString()) return "I går";
+  return d.toLocaleDateString("nb-NO",{weekday:"long",day:"numeric",month:"long"});
+}
 function matchesView(){
-  const groups={};
-  (S.matches||[]).filter(m=>m.stage==="group").forEach(m=>{ (groups[m.group_letter]=groups[m.group_letter]||[]).push(m); });
-  const letters=Object.keys(groups).sort();
-  if(!letters.length) return heroBanner("kamper")+`<div class="empty">Ingen kamper lagt inn ennå.</div>`;
+  const all=(S.matches||[]).filter(m=>m.stage==="group").sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
+  if(!all.length) return heroBanner("kamper")+`<div class="empty">Ingen kamper lagt inn ennå.</div>`;
+  const cutoff=nowMs()-24*60*60*1000;
+  const old=all.filter(m=>new Date(m.kickoff).getTime()<cutoff);
+  const active=all.filter(m=>new Date(m.kickoff).getTime()>=cutoff);
   let html=heroBanner("kamper");
-  letters.forEach(L=>{ html+=`<div class="group-head"><span class="group-pill">Gruppe ${L}</span></div>`; groups[L].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff)); html+=groups[L].map(matchCard).join(""); });
+  let lastDay="";
+  (active.length?active:all).forEach(m=>{
+    const day=fmtDay(m.kickoff);
+    if(day!==lastDay){ html+=`<div class="date-header">${day}</div>`; lastDay=day; }
+    html+=matchCard(m);
+  });
+  if(old.length&&active.length){
+    html+=`<button class="older-toggle" id="toggle-older" data-count="${old.length}">▸ Vis ${old.length} eldre kamper</button>`;
+    html+=`<div id="older-matches" style="display:none">`;
+    lastDay="";
+    old.forEach(m=>{ const day=fmtDay(m.kickoff); if(day!==lastDay){ html+=`<div class="date-header">${day}</div>`; lastDay=day; } html+=matchCard(m); });
+    html+=`</div>`;
+  }
   return html;
 }
 function sluttspillView(){
@@ -336,7 +359,10 @@ function matchCard(m){
     }
   }
   return `<div class="match ${locked?'locked':''}">
-    <div class="meta"><span>${fmtDate(m.kickoff)}</span>${locked&&!m.finished?'<span class="lock">🔒 Låst</span>':(m.points_value>1?`<span>${m.points_value} poeng</span>`:'')}</div>
+    <div class="meta">
+      <span style="display:flex;gap:6px;align-items:center">${fmtDate(m.kickoff)}${m.group_letter?`<span class="group-badge">Gr. ${m.group_letter}</span>`:''}</span>
+      ${locked&&!m.finished?'<span class="lock">🔒 Låst</span>':(m.points_value>1?`<span>${m.points_value} poeng</span>`:'')}
+    </div>
     <div class="teams"><div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div><div class="vs">VS</div><div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div></div>
     ${controls}${resultTag}${picksSummary}${picksDetail}
   </div>`;
@@ -396,6 +422,8 @@ function bindMain(){
     catch(e){ S.me.picks[String(mid)]=prev; renderMain(); toast(cleanErr(e),true); }
   });
   const sb=$("#save-bonus"); if(sb) sb.onclick=async()=>{ sb.disabled=true; try{ const r=await rpc("save_specials",{p_token:token,p_top_scorer:$("#sc-scorer").value,p_champion:$("#sc-champ").value}); if(!r.ok) throw new Error(r.error); toast("Bonustips lagret ✓"); await loadState(); }catch(e){ toast(cleanErr(e),true); } sb.disabled=false; renderMain(); };
+  const tog=$("#toggle-older");
+  if(tog) tog.onclick=()=>{ const box=$("#older-matches"); if(!box) return; const open=box.style.display!=="none"; box.style.display=open?"none":"block"; tog.textContent=open?`▸ Vis ${tog.dataset.count} eldre kamper`:`▾ Skjul eldre kamper`; };
   document.querySelectorAll(".see-picks-btn").forEach(b=>b.onclick=e=>{ e.stopPropagation(); const detail=document.getElementById("pd-"+b.dataset.mid); if(!detail) return; const open=detail.style.display!=="none"; detail.style.display=open?"none":"block"; b.textContent=open?"👥 Se svar":"👆 Skjul"; });
   bindAdmin();
 }
@@ -407,12 +435,7 @@ function bindAdmin(){
   const cp=$("#change-pin"); if(cp) cp.onclick=async()=>{ const np=$("#np").value; const r=await rpc("admin_change_pin",{p_admin_pin:adminPin,p_new_pin:np}); if(r.ok){ adminPin=np; toast("Admin-PIN endret ✓"); } else toast(r.error,true); };
   const fn=$("#fetch-now"); if(fn) fn.onclick=async()=>{
     fn.disabled=true; fn.textContent="Henter…";
-    try{
-      const r=await fetch("https://gqdnxnzpyrmtuumfjofp.supabase.co/functions/v1/fetch-results",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
-      const d=await r.json();
-      if(d.ok){ toast(d.updated>0?`✓ ${d.updated} resultat(er) oppdatert`:"Ingen nye resultater ennå"); if(d.updated>0){ await loadState(); renderMain(); } }
-      else toast(d.error||"Feil ved henting",true);
-    }catch(e){ toast(cleanErr(e),true); }
+    try{ const r=await fetch("https://gqdnxnzpyrmtuumfjofp.supabase.co/functions/v1/fetch-results",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}); const d=await r.json(); if(d.ok){ toast(d.updated>0?`✓ ${d.updated} resultat(er) oppdatert`:"Ingen nye resultater ennå"); if(d.updated>0){ await loadState(); renderMain(); } } else toast(d.error||"Feil ved henting",true); }catch(e){ toast(cleanErr(e),true); }
     fn.disabled=false; fn.textContent="Hent nå";
   };
   const sf=$("#save-fasit"); if(sf) sf.onclick=async()=>{ const r=await rpc("admin_set_specials_result",{p_admin_pin:adminPin,p_top_scorer:$("#fa-scorer").value,p_champion:$("#fa-champ").value}); if(r.ok){ S._sr_scorer=$("#fa-scorer").value; S._sr_champ=$("#fa-champ").value; toast("Fasit lagret ✓"); await loadState(); } else toast(r.error,true); };
