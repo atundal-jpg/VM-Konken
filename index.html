@@ -51,11 +51,9 @@
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   .wrap{max-width:680px;margin:0 auto;padding:0 16px 120px}
-
-  /* ===== HEADER ===== */
   header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);min-height:200px}
   header .pitch{position:absolute;inset:0;opacity:.16;pointer-events:none}
-  .header-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:.4;z-index:0}
+  .header-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:.22;z-index:0}
   header::after{content:"";position:absolute;inset:0;z-index:0;
     background:linear-gradient(180deg,rgba(8,16,11,.5),rgba(8,16,11,.88))}
   header .inner{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:26px 16px 22px}
@@ -75,14 +73,10 @@
   .who .dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)}
   .ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer;font-weight:600}
   .ghost:hover{border-color:var(--muted);color:var(--text)}
-
-  /* ===== TABS ===== */
   nav.tabs{position:sticky;top:0;z-index:20;background:rgba(8,11,9,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
   nav.tabs .inner{max-width:680px;margin:0 auto;display:flex;gap:4px;padding:8px 12px;overflow-x:auto}
   .tab{flex:1;min-width:max-content;text-align:center;padding:10px 14px;border-radius:11px;border:1px solid transparent;background:transparent;color:var(--muted);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
   .tab[aria-selected="true"]{background:var(--lime);color:#0a0f06;box-shadow:0 6px 18px -8px var(--lime)}
-
-  /* ===== CARDS ===== */
   .section-title{font-family:"Anton",sans-serif;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:26px 2px 12px;display:flex;align-items:center;gap:10px}
   .section-title::after{content:"";flex:1;height:1px;background:var(--line)}
   .group-pill{display:inline-flex;align-items:center;gap:8px;font-family:"Anton",sans-serif;font-size:15px;letter-spacing:.1em;color:var(--ink);background:var(--lime);padding:4px 12px;border-radius:999px;text-transform:uppercase}
@@ -99,8 +93,6 @@
   .flag-x{font-size:20px}
   .team .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .vs{font-family:"Anton",sans-serif;color:var(--muted);font-size:13px}
-
-  /* ===== HERO BANNERS ===== */
   .hero{position:relative;min-height:128px;border-radius:18px;overflow:hidden;margin:18px 0 4px;border:1px solid var(--line);display:flex;align-items:flex-end;padding:16px;background:linear-gradient(135deg,var(--card),var(--card-2))}
   .hero .art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.30}
   .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,16,11,.35),rgba(8,16,11,.82));z-index:0}
@@ -110,8 +102,6 @@
   .credits{max-width:680px;margin:34px auto 0;padding:16px 16px 40px;text-align:center;font-size:11px;color:var(--muted);line-height:1.8;border-top:1px solid var(--line)}
   .credits a{color:var(--muted);text-decoration:underline}
   .credits a:hover{color:var(--text)}
-
-  /* ===== PICKS DISPLAY ===== */
   .picks-summary{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
   .pcnt{font-size:11.5px;font-weight:800;padding:4px 9px;border-radius:8px}
   .pcnt-H{background:rgba(47,196,107,.15);color:var(--lime)}
@@ -129,7 +119,6 @@
   .ptag-B{background:rgba(255,107,97,.2);color:var(--red)}
   .ptag-home{background:rgba(47,196,107,.2);color:var(--lime)}
   .ptag-away{background:rgba(255,107,97,.2);color:var(--red)}
-
   .huv{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
   .pick{appearance:none;border:1px solid var(--line);background:var(--ink-2);color:var(--text);border-radius:12px;padding:10px 6px;font-family:inherit;cursor:pointer;text-align:center;transition:.15s;line-height:1.05}
   .pick b{font-family:"Anton",sans-serif;font-size:20px;display:block}
@@ -142,8 +131,6 @@
   .pick.is-result{border-color:var(--amber)}
   .result-tag{font-size:11px;color:var(--amber);margin-top:8px;display:flex;gap:6px;align-items:center}
   .result-tag .pts{margin-left:auto;color:var(--lime);font-weight:800}
-
-  /* ===== AUTH ===== */
   .auth-screen{min-height:60vh;display:grid;place-items:center;padding:30px 0}
   .auth-card{width:100%;max-width:380px;background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--line);border-radius:22px;padding:26px 22px;box-shadow:var(--shadow)}
   .auth-card h2{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em;font-size:26px;margin:0 0 4px}
@@ -158,14 +145,10 @@
   .switcher{text-align:center;margin-top:16px;color:var(--muted);font-size:14px}
   .switcher button{background:none;border:none;color:var(--lime);font-family:inherit;font-weight:700;cursor:pointer;font-size:14px}
   .err{background:rgba(255,93,82,.12);border:1px solid rgba(255,93,82,.4);color:#ffb3ad;border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:14px}
-
-  /* ===== SPECIALS ===== */
   .panel{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:14px}
   .panel h3{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;font-size:20px;margin:0 0 4px;letter-spacing:.02em}
   .panel .hint{color:var(--muted);font-size:13px;margin:0 0 16px}
   .badge-lock{display:inline-flex;gap:6px;align-items:center;background:rgba(109,108,241,.14);border:1px solid rgba(109,108,241,.45);color:var(--lavender);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;margin-bottom:14px}
-
-  /* ===== LEADERBOARD ===== */
   .lb-row{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 16px;margin-bottom:9px}
   .lb-row.me{border-color:var(--lime);background:linear-gradient(90deg,rgba(47,196,107,.10),var(--card))}
   .lb-pos{font-family:"Anton",sans-serif;font-size:22px;color:var(--muted);width:34px;text-align:center;flex:none}
@@ -176,8 +159,6 @@
   .lb-pts{font-family:"Anton",sans-serif;font-size:26px;color:var(--mint);flex:none}
   .lb-pts small{font-size:11px;color:var(--muted);font-family:"Schibsted Grotesk";display:block;text-align:right;letter-spacing:.1em}
   .empty{color:var(--muted);text-align:center;padding:40px 10px;font-size:14px}
-
-  /* ===== ADMIN ===== */
   .admin-tools .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .seg button{background:var(--ink-2);border:none;color:var(--muted);padding:8px 12px;font-family:inherit;font-weight:700;cursor:pointer;font-size:13px}
@@ -186,7 +167,6 @@
   .chk{display:inline-flex;gap:6px;align-items:center;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px;cursor:pointer;font-size:13px;font-weight:600}
   .chk input{accent-color:var(--lime)}
   .adm-input{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-family:inherit;font-size:15px}
-
   #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--lime);color:#0a0f06;font-weight:800;padding:12px 20px;border-radius:12px;z-index:50;transition:.25s;pointer-events:none;box-shadow:0 12px 30px -10px rgba(0,0,0,.6);font-size:14px}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   #toast.bad{background:var(--red);color:#fff}
@@ -203,21 +183,18 @@
 <script>
 const SB_URL = "https://gqdnxnzpyrmtuumfjofp.supabase.co";
 const SB_KEY = "sb_publishable_J6WoCpu61oelHK8ii76grg_C5xZOWNP";
-
 const mem = {};
 const store = {
   get(k){ try{ return localStorage.getItem(k); }catch(e){ return (k in mem)?mem[k]:null; } },
   set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } },
   del(k){ try{ localStorage.removeItem(k); }catch(e){ delete mem[k]; } }
 };
-
 async function rpc(fn, params){
   const res = await fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(params||{})});
   const txt = await res.text();
   if(!res.ok) throw new Error(txt||("HTTP "+res.status));
   return txt ? JSON.parse(txt) : null;
 }
-
 const FLAG_CC = {
   "Mexico":"mx","Sør-Afrika":"za","Sør-Korea":"kr","Tsjekkia":"cz","Canada":"ca",
   "Bosnia-Hercegovina":"ba","USA":"us","Paraguay":"py","Qatar":"qa","Sveits":"ch",
@@ -235,16 +212,11 @@ function flag(t){
   if(!cc) return '<span class="flag-x">⚽</span>';
   return `<img class="flagimg" src="https://flagcdn.com/w40/${cc}.png" srcset="https://flagcdn.com/w80/${cc}.png 2x" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('⚽'))">`;
 }
-
-const ART_PITCH = `<svg class="art" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#8ff08c" stroke-width="1.6"><rect x="24" y="16" width="352" height="108" rx="3"/><line x1="200" y1="16" x2="200" y2="124"/><circle cx="200" cy="70" r="24"/><rect x="24" y="40" width="40" height="60"/><rect x="336" y="40" width="40" height="60"/><rect x="24" y="54" width="16" height="32"/><rect x="360" y="54" width="16" height="32"/></g><circle cx="200" cy="70" r="6" fill="#8ff08c"/></svg>`;
-const ART_TROPHY = `<svg class="art" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#8ff08c" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M168 36 h64 v20 a32 32 0 0 1 -64 0 z"/><path d="M168 42 h-18 a14 14 0 0 0 18 20"/><path d="M232 42 h18 a14 14 0 0 1 -18 20"/><line x1="200" y1="80" x2="200" y2="94"/><path d="M182 94 h36 l-4 12 h-28 z"/><line x1="170" y1="108" x2="230" y2="108"/></g><g fill="#6d6cf1"><circle cx="150" cy="34" r="2.5"/><circle cx="262" cy="52" r="2"/><circle cx="138" cy="82" r="2"/><circle cx="272" cy="96" r="2.5"/></g><path d="M250 28 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 z" fill="#8ff08c"/></svg>`;
-const ART_PODIUM = `<svg class="art" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect x="118" y="74" width="54" height="50" rx="2" fill="#27a85a"/><rect x="173" y="50" width="54" height="74" rx="2" fill="#2fc46b"/><rect x="228" y="90" width="54" height="34" rx="2" fill="#6d6cf1"/><g fill="#0a1610" font-family="Anton, sans-serif" font-size="22" text-anchor="middle"><text x="145" y="106">2</text><text x="200" y="88">1</text><text x="255" y="114">3</text></g><path d="M180 46 L186 32 L200 42 L214 32 L220 46 Z" fill="#8ff08c"/></svg>`;
-
 const HERO = {
-  kamper:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Uruguay_-_Costa_Rica_FIFA_World_Cup_2014_(23).jpg/1280px-Uruguay_-_Costa_Rica_FIFA_World_Cup_2014_(23).jpg", k:"Kampene", s:"Tipp H, U eller B – du kan endre helt til avspark"},
-  sluttspill:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/2010_World_Cup_Spain_with_cup.JPG/1280px-2010_World_Cup_Spain_with_cup.JPG", k:"Sluttspillet", s:"Hvem går videre? Tipp lag for lag"},
-  bonus:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/2022_FIFA_World_Cup_England_6%E2%80%932_Iran_-_(4).jpg/1280px-2022_FIFA_World_Cup_England_6%E2%80%932_Iran_-_(4).jpg", k:"Bonustips", s:"Toppscorer & VM-vinner · 5 poeng hver"},
-  tabell:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/The_opening_ceremony_of_the_FIFA_World_Cup_2014_01.jpg/1280px-The_opening_ceremony_of_the_FIFA_World_Cup_2014_01.jpg", k:"Tabellen", s:"Hvem troner øverst?"}
+  kamper:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Uruguay_-_Costa_Rica_FIFA_World_Cup_2014_(23).jpg/1280px-Uruguay_-_Costa_Rica_FIFA_World_Cup_2014_(23).jpg",k:"Kampene",s:"Tipp H, U eller B – du kan endre helt til avspark"},
+  sluttspill:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/2010_World_Cup_Spain_with_cup.JPG/1280px-2010_World_Cup_Spain_with_cup.JPG",k:"Sluttspillet",s:"Hvem går videre? Tipp lag for lag"},
+  bonus:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/2022_FIFA_World_Cup_England_6%E2%80%932_Iran_-_(4).jpg/1280px-2022_FIFA_World_Cup_England_6%E2%80%932_Iran_-_(4).jpg",k:"Bonustips",s:"Toppscorer & VM-vinner · 5 poeng hver"},
+  tabell:{photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/The_opening_ceremony_of_the_FIFA_World_Cup_2014_01.jpg/1280px-The_opening_ceremony_of_the_FIFA_World_Cup_2014_01.jpg",k:"Tabellen",s:"Hvem troner øverst?"}
 };
 const HEADER_IMG = {
   kamper:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Maradona_shilton_mano_dios.jpg/1280px-Maradona_shilton_mano_dios.jpg",
@@ -254,29 +226,16 @@ const HEADER_IMG = {
 };
 function setHeaderBg(){ const el=document.getElementById("hbg"); if(!el) return; el.src=HEADER_IMG[view]||HEADER_IMG.kamper; el.style.display=""; }
 function heroBanner(kind){ const h=HERO[kind]; if(!h) return ""; const bg=h.photo?`<img class="art" src="${h.photo}" alt="" loading="lazy" onerror="this.style.display='none'">`:(h.art||""); return `<div class="hero">${bg}<div class="htext"><div class="k">${h.k}</div><div class="s">${h.s}</div></div></div>`; }
-
-const STAGE_NAMES = {group:"Gruppespill",r32:"16-delsfinale",r16:"Åttedelsfinale",qf:"Kvartfinale",sf:"Semifinale",final:"Finale"};
-const ALL_STAGES = ["group","r32","r16","qf","sf","final"];
-
-let S = null;
-let token = store.get("vmt_token");
-let view = "kamper";
-let authMode = "login";
-let adminPin = null;
-let adminUsers = null;
-
-const $ = sel => document.querySelector(sel);
-function toast(msg, bad){ const t=$("#toast"); t.textContent=msg; t.className="show"+(bad?" bad":""); clearTimeout(t._t); t._t=setTimeout(()=>{ t.className=""; },2600); }
+const STAGE_NAMES={group:"Gruppespill",r32:"16-delsfinale (32)",r16:"Åttedelsfinale",qf:"Kvartfinale",sf:"Semifinale",final:"Finale"};
+const ALL_STAGES=["group","r32","r16","qf","sf","final"];
+let S=null,token=store.get("vmt_token"),view="kamper",authMode="login",adminPin=null,adminUsers=null;
+const $=sel=>document.querySelector(sel);
+function toast(msg,bad){ const t=$("#toast"); t.textContent=msg; t.className="show"+(bad?" bad":""); clearTimeout(t._t); t._t=setTimeout(()=>{ t.className=""; },2600); }
 function fmtDate(iso){ return new Date(iso).toLocaleString("nb-NO",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); }
-function nowMs(){ return S ? new Date(S.now).getTime() : Date.now(); }
+function nowMs(){ return S?new Date(S.now).getTime():Date.now(); }
 function isLocked(m){ if(m.finished) return true; if(!S.open_stages.includes(m.stage)) return true; return new Date(m.kickoff).getTime()<=nowMs(); }
 function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
-
-async function loadState(){
-  S = await rpc("get_state",{p_token:token||null});
-  if(token && !S.me){ token=null; store.del("vmt_token"); }
-}
-
+async function loadState(){ S=await rpc("get_state",{p_token:token||null}); if(token&&!S.me){ token=null; store.del("vmt_token"); } }
 function render(){
   const app=$("#app");
   if(!S){ app.innerHTML='<div class="loading"><div class="spin"></div></div>'; return; }
@@ -285,8 +244,7 @@ function render(){
   bindHeader(); bindTabs(); renderMain();
 }
 function footerView(){
-  return `<footer class="credits">
-    Bilder via Wikimedia Commons:
+  return `<footer class="credits">Bilder via Wikimedia Commons:
     <a href="https://commons.wikimedia.org/wiki/File:Maradona_shilton_mano_dios.jpg" target="_blank" rel="noopener">Maradona 1986 (PD)</a> ·
     <a href="https://commons.wikimedia.org/wiki/File:Germany_champions_2014_FIFA_World_Cup.jpg" target="_blank" rel="noopener">Tyskland 2014 (CC BY-SA)</a> ·
     <a href="https://commons.wikimedia.org/wiki/File:Norway_Italy_-_June_2025_C_46.jpg" target="_blank" rel="noopener">Norge–Italia 2025 (CC BY-SA)</a> ·
@@ -297,7 +255,6 @@ function footerView(){
     <a href="https://commons.wikimedia.org/wiki/File:2010_World_Cup_Spain_with_cup.JPG" target="_blank" rel="noopener">Spania 2010 (CC BY-SA)</a>
   </footer>`;
 }
-
 function headerView(){
   return `<header>
     <img class="header-bg" id="hbg" alt="" onerror="this.style.display='none'">
@@ -306,10 +263,7 @@ function headerView(){
       <h1>VM-<span class="hl">Konken</span></h1>
       <div class="tagline">Tippekonkurranse for Allstad for VM 2026</div>
       ${countdownView()}
-      <div class="userbar">
-        <div class="who"><span class="dot"></span>${esc(S.me.username)}</div>
-        <button class="ghost" id="logout">Logg ut</button>
-      </div>
+      <div class="userbar"><div class="who"><span class="dot"></span>${esc(S.me.username)}</div><button class="ghost" id="logout">Logg ut</button></div>
     </div>
   </header>`;
 }
@@ -323,7 +277,6 @@ function tabsView(){
   const tabs=[["kamper","Kamper"],["sluttspill","Sluttspill"],["bonus","Bonustips"],["tabell","Tabell"],["admin","Admin"]];
   return `<nav class="tabs"><div class="inner">${tabs.map(([k,l])=>`<button class="tab" role="tab" data-tab="${k}" aria-selected="${view===k}">${l}</button>`).join("")}</div></nav>`;
 }
-
 function renderMain(){
   const main=$("#main"); if(!main) return;
   main.classList.remove("fade-in"); void main.offsetWidth; main.classList.add("fade-in");
@@ -332,40 +285,26 @@ function renderMain(){
   else if(view==="bonus") main.innerHTML=bonusView();
   else if(view==="tabell") main.innerHTML=tabellView();
   else if(view==="admin") main.innerHTML=adminView();
-  setHeaderBg();
-  bindMain();
+  setHeaderBg(); bindMain();
 }
-
 function matchesView(){
   const groups={};
   (S.matches||[]).filter(m=>m.stage==="group").forEach(m=>{ (groups[m.group_letter]=groups[m.group_letter]||[]).push(m); });
   const letters=Object.keys(groups).sort();
   if(!letters.length) return heroBanner("kamper")+`<div class="empty">Ingen kamper lagt inn ennå.</div>`;
   let html=heroBanner("kamper");
-  letters.forEach(L=>{
-    html+=`<div class="group-head"><span class="group-pill">Gruppe ${L}</span></div>`;
-    groups[L].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
-    html+=groups[L].map(matchCard).join("");
-  });
+  letters.forEach(L=>{ html+=`<div class="group-head"><span class="group-pill">Gruppe ${L}</span></div>`; groups[L].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff)); html+=groups[L].map(matchCard).join(""); });
   return html;
 }
-
 function sluttspillView(){
   const ko=(S.matches||[]).filter(m=>m.stage!=="group");
   if(!ko.length) return heroBanner("sluttspill")+`<div class="empty">Sluttspillet starter snart!<br><br>Kom tilbake når gruppespillet er ferdig – her tipper du runde for runde hvem som går videre.</div>`;
   let html=heroBanner("sluttspill");
-  ALL_STAGES.filter(s=>s!=="group").forEach(st=>{
-    const ms=ko.filter(m=>m.stage===st); if(!ms.length) return;
-    html+=`<div class="section-title">${STAGE_NAMES[st]}</div>`;
-    html+=ms.map(matchCard).join("");
-  });
+  ALL_STAGES.filter(s=>s!=="group").forEach(st=>{ const ms=ko.filter(m=>m.stage===st); if(!ms.length) return; html+=`<div class="section-title">${STAGE_NAMES[st]}</div>`; html+=ms.map(matchCard).join(""); });
   return html;
 }
-
 function matchCard(m){
-  const locked=isLocked(m);
-  const myPick=S.me.picks[String(m.id)]||null;
-  const isGroup=m.stage==="group";
+  const locked=isLocked(m),myPick=S.me.picks[String(m.id)]||null,isGroup=m.stage==="group";
   let controls;
   if(isGroup){
     controls=`<div class="huv">`+[["H","Hjemme"],["U","Uavgjort"],["B","Borte"]].map(([v,lab])=>{
@@ -389,53 +328,32 @@ function matchCard(m){
     if(allUsers.length>0){
       const counts={};
       Object.values(matchPicks).forEach(p=>{ counts[p]=(counts[p]||0)+1; });
-      const dKeys=isGroup?["H","U","B"]:["home","away"];
-      const dLabels=isGroup?["H","U","B"]:["Hjemme","Borte"];
+      const dKeys=isGroup?["H","U","B"]:["home","away"],dLabels=isGroup?["H","U","B"]:["Hjemme","Borte"];
       const dist=dKeys.map((v,i)=>`<span class="pcnt pcnt-${v}">${dLabels[i]} ${counts[v]||0}</span>`).join("");
       picksSummary=`<div class="picks-summary">${dist}<button class="see-picks-btn" data-mid="${m.id}">👥 Se svar</button></div>`;
-      const rows=allUsers.map(uname=>{
-        const pick=matchPicks[uname];
-        const isMe=S.me&&uname===S.me.username;
-        const meTag=isMe?` <span class="tagme">DEG</span>`:"";
-        if(!pick) return `<div class="pick-row"><span>${esc(uname)}${meTag}</span><span class="notipped">ikke tippet</span></div>`;
-        let label=pick,cls="ptag-"+pick;
-        if(!isGroup){ label=pick==="home"?m.home_team:m.away_team; }
-        if(m.finished&&pick===m.result) label+=" ✓";
-        return `<div class="pick-row"><span>${esc(uname)}${meTag}</span><span class="ptag ${cls}">${esc(label)}</span></div>`;
-      }).join("");
+      const rows=allUsers.map(uname=>{ const pick=matchPicks[uname],isMe=S.me&&uname===S.me.username,meTag=isMe?` <span class="tagme">DEG</span>`:""; if(!pick) return `<div class="pick-row"><span>${esc(uname)}${meTag}</span><span class="notipped">ikke tippet</span></div>`; let label=pick,cls="ptag-"+pick; if(!isGroup){ label=pick==="home"?m.home_team:m.away_team; } if(m.finished&&pick===m.result) label+=" ✓"; return `<div class="pick-row"><span>${esc(uname)}${meTag}</span><span class="ptag ${cls}">${esc(label)}</span></div>`; }).join("");
       picksDetail=`<div class="picks-detail" id="pd-${m.id}" style="display:none">${rows}</div>`;
     }
   }
   return `<div class="match ${locked?'locked':''}">
     <div class="meta"><span>${fmtDate(m.kickoff)}</span>${locked&&!m.finished?'<span class="lock">🔒 Låst</span>':(m.points_value>1?`<span>${m.points_value} poeng</span>`:'')}</div>
-    <div class="teams">
-      <div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div>
-      <div class="vs">VS</div>
-      <div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div>
-    </div>
+    <div class="teams"><div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div><div class="vs">VS</div><div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div></div>
     ${controls}${resultTag}${picksSummary}${picksDetail}
   </div>`;
 }
-
 function bonusView(){
-  const locked=S.specials_locked;
-  const sp=S.me.specials||{top_scorer:null,champion:null};
+  const locked=S.specials_locked,sp=S.me.specials||{top_scorer:null,champion:null};
   return heroBanner("bonus")+`
   ${locked?`<div class="badge-lock">🔒 Fristen er passert – tipsene er låst</div>`:`<div class="badge-lock" style="background:rgba(47,196,107,.12);border-color:rgba(47,196,107,.45);color:var(--mint)">⏱ Frist: avspark 11. juni</div>`}
   <div class="panel"><h3>⚽ Toppscorer</h3><p class="hint">Hvem blir VM-toppscorer? Riktig svar gir <b style="color:var(--lime)">5 poeng</b>.</p><div class="field"><input id="sc-scorer" placeholder="F.eks. Erling Haaland" value="${esc(sp.top_scorer||"")}" ${locked?"disabled":""}></div></div>
   <div class="panel"><h3>🏆 VM-vinner</h3><p class="hint">Hvilket land løfter pokalen? Riktig svar gir <b style="color:var(--lime)">5 poeng</b>.</p><div class="field"><input id="sc-champ" placeholder="F.eks. Frankrike" value="${esc(sp.champion||"")}" ${locked?"disabled":""}></div></div>
   ${locked?"":`<button class="btn" id="save-bonus">Lagre bonustips</button>`}`;
 }
-
 function tabellView(){
   const lb=S.leaderboard||[];
   if(!lb.length) return heroBanner("tabell")+`<div class="empty">Ingen poeng ennå – tabellen fylles når kampene er ferdig.</div>`;
-  return heroBanner("tabell")+`<div class="section-title">Stillingen</div>`+lb.map((r,i)=>{
-    const me=r.username===S.me.username,top=i<3?` top${i+1}`:"";
-    return `<div class="lb-row${me?' me':''}${top}"><div class="lb-pos">${i+1}</div><div style="flex:1;min-width:0"><div class="lb-name">${esc(r.username)}${me?'<span class="tagme">DEG</span>':''}</div><div class="lb-sub">${r.correct} riktige tips</div></div><div class="lb-pts">${r.total_points}<small>POENG</small></div></div>`;
-  }).join("");
+  return heroBanner("tabell")+`<div class="section-title">Stillingen</div>`+lb.map((r,i)=>{ const me=r.username===S.me.username,top=i<3?` top${i+1}`:""; return `<div class="lb-row${me?' me':''}${top}"><div class="lb-pos">${i+1}</div><div style="flex:1;min-width:0"><div class="lb-name">${esc(r.username)}${me?'<span class="tagme">DEG</span>':''}</div><div class="lb-sub">${r.correct} riktige tips</div></div><div class="lb-pts">${r.total_points}<small>POENG</small></div></div>`; }).join("");
 }
-
 function adminView(){
   if(!adminPin) return `<div class="panel" style="max-width:420px;margin:30px auto"><h3>🔐 Adminside</h3><p class="hint">Skriv inn admin-PIN for å registrere resultater og styre rundene.</p><div id="adm-err"></div><div class="field"><input id="adm-pin" type="password" inputmode="numeric" placeholder="Admin-PIN"></div><button class="btn" id="adm-login">Logg inn som admin</button></div>`;
   const matches=S.matches||[],stagesOpen=S.open_stages||[];
@@ -445,12 +363,19 @@ function adminView(){
     <p class="hint">Åpne eller lukk tipping per runde. Tips låses uansett automatisk ved avspark.</p>
     <div class="row">${ALL_STAGES.map(st=>`<label class="chk"><input type="checkbox" data-stage="${st}" ${stagesOpen.includes(st)?"checked":""}> ${STAGE_NAMES[st]}</label>`).join("")}</div>
     <div class="row" style="margin-top:6px"><label class="chk"><input type="checkbox" id="lock-sp" ${S.specials_locked?"checked":""}> Lås bonustips (toppscorer/vinner)</label></div>
-    <div class="row" style="margin-top:14px"><input class="adm-input" id="np" type="password" placeholder="Ny admin-PIN" style="flex:1"><button class="ghost" id="change-pin">Bytt PIN</button></div>
+    <div class="row" style="margin-top:14px">
+      <input class="adm-input" id="np" type="password" placeholder="Ny admin-PIN" style="flex:1">
+      <button class="ghost" id="change-pin">Bytt PIN</button>
+    </div>
+    <div class="row" style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px">
+      <div><div style="font-weight:700;font-size:14px">🔄 Automatisk henting</div><div class="mini">Resultater hentes fra football-data.org hvert 30. min</div></div>
+      <button class="ghost" id="fetch-now" style="border-color:rgba(47,196,107,.4);color:var(--lime);white-space:nowrap">Hent nå</button>
+    </div>
   </div>
   <div class="section-title">Brukere</div>
   <div class="panel admin-tools">
     <p class="hint">Se hvem som er med, nullstill PIN for noen som har glemt sin, eller slett test-/feilbrukere.</p>
-    ${adminUsers===null?'<div class="mini">Laster…</div>':(adminUsers.length===0?'<div class="mini">Ingen brukere ennå.</div>':adminUsers.map(u=>`<div class="user-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap"><div style="min-width:0"><b>${esc(u.username)}</b> <span class="mini">· ${u.picks} tips</span></div><div class="row" style="margin:0;gap:6px"><input class="adm-input" placeholder="Ny PIN" inputmode="numeric" style="width:92px"><button class="ghost" data-reset="${esc(u.username)}">Nullstill</button><button class="ghost" data-del="${esc(u.username)}" style="border-color:rgba(255,107,97,.4);color:var(--red)">Slett</button></div></div>`).join(''))}
+    ${adminUsers===null?'<div class="mini">Laster…</div>':(adminUsers.length===0?'<div class="mini">Ingen brukere registrert ennå.</div>':adminUsers.map(u=>`<div class="user-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap"><div style="min-width:0"><b>${esc(u.username)}</b> <span class="mini">· ${u.picks} tips</span></div><div class="row" style="margin:0;gap:6px"><input class="adm-input" placeholder="Ny PIN" inputmode="numeric" style="width:92px"><button class="ghost" data-reset="${esc(u.username)}">Nullstill</button><button class="ghost" data-del="${esc(u.username)}" style="border-color:rgba(255,107,97,.4);color:var(--red)">Slett</button></div></div>`).join(''))}
   </div>
   <div class="section-title">Fasit: bonus</div>
   <div class="panel admin-tools">
@@ -459,13 +384,8 @@ function adminView(){
     <button class="ghost" id="save-fasit">Lagre fasit</button>
   </div>
   <div class="section-title">Registrer resultater</div>
-  ${matches.length?matches.map(m=>{
-    const isGroup=m.stage==="group",cur=m.result;
-    const opts=isGroup?[["H","H"],["U","U"],["B","B"]]:[[" home",m.home_team],["away",m.away_team]];
-    return `<div class="match"><div class="meta"><span>${STAGE_NAMES[m.stage]}${m.group_letter?" · Gr. "+m.group_letter:""} · ${fmtDate(m.kickoff)}</span>${m.finished?'<span style="color:var(--lime)">✓ ferdig</span>':''}</div><div class="teams"><div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div><div class="vs">VS</div><div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div></div><div class="seg" role="group">${opts.map(([v,lab])=>`<button data-res="${v.trim()}" data-mid="${m.id}" class="${cur===v.trim()?'on':''}">${esc(lab)}</button>`).join("")}<button data-res="" data-mid="${m.id}" class="${!cur?'on':''}">–</button></div></div>`;
-  }).join(""):'<div class="empty">Ingen kamper.</div>'}`;
+  ${matches.length?matches.map(m=>{ const isGroup=m.stage==="group",cur=m.result,opts=isGroup?[["H","H"],["U","U"],["B","B"]]:[[" home",m.home_team],["away",m.away_team]]; return `<div class="match"><div class="meta"><span>${STAGE_NAMES[m.stage]}${m.group_letter?" · Gr. "+m.group_letter:""} · ${fmtDate(m.kickoff)}</span>${m.finished?'<span style="color:var(--lime)">✓ ferdig</span>':''}</div><div class="teams"><div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div><div class="vs">VS</div><div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div></div><div class="seg" role="group">${opts.map(([v,lab])=>`<button data-res="${v.trim()}" data-mid="${m.id}" class="${cur===v.trim()?'on':''}">${esc(lab)}</button>`).join("")}<button data-res="" data-mid="${m.id}" class="${!cur?'on':''}">–</button></div></div>`; }).join(""):'<div class="empty">Ingen kamper.</div>'}`;
 }
-
 function bindHeader(){ const lo=$("#logout"); if(lo) lo.onclick=()=>{ token=null; store.del("vmt_token"); adminPin=null; loadAndRender(); }; }
 function bindTabs(){ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ view=b.dataset.tab; document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x.dataset.tab===view)); renderMain(); }); }
 function bindMain(){
@@ -485,18 +405,27 @@ function bindAdmin(){
   document.querySelectorAll('[data-stage]').forEach(c=>c.onchange=async()=>{ const stages=[...document.querySelectorAll('[data-stage]:checked')].map(x=>x.dataset.stage); const r=await rpc("admin_set_open_stages",{p_admin_pin:adminPin,p_stages:stages}); if(r.ok){ S.open_stages=stages; toast("Lagret ✓"); } else toast(r.error,true); });
   const ls=$("#lock-sp"); if(ls) ls.onchange=async()=>{ const r=await rpc("admin_lock_specials",{p_admin_pin:adminPin,p_locked:ls.checked}); if(r.ok){ toast("Lagret ✓"); await loadState(); renderMain(); } else toast(r.error,true); };
   const cp=$("#change-pin"); if(cp) cp.onclick=async()=>{ const np=$("#np").value; const r=await rpc("admin_change_pin",{p_admin_pin:adminPin,p_new_pin:np}); if(r.ok){ adminPin=np; toast("Admin-PIN endret ✓"); } else toast(r.error,true); };
+  const fn=$("#fetch-now"); if(fn) fn.onclick=async()=>{
+    fn.disabled=true; fn.textContent="Henter…";
+    try{
+      const r=await fetch("https://gqdnxnzpyrmtuumfjofp.supabase.co/functions/v1/fetch-results",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+      const d=await r.json();
+      if(d.ok){ toast(d.updated>0?`✓ ${d.updated} resultat(er) oppdatert`:"Ingen nye resultater ennå"); if(d.updated>0){ await loadState(); renderMain(); } }
+      else toast(d.error||"Feil ved henting",true);
+    }catch(e){ toast(cleanErr(e),true); }
+    fn.disabled=false; fn.textContent="Hent nå";
+  };
   const sf=$("#save-fasit"); if(sf) sf.onclick=async()=>{ const r=await rpc("admin_set_specials_result",{p_admin_pin:adminPin,p_top_scorer:$("#fa-scorer").value,p_champion:$("#fa-champ").value}); if(r.ok){ S._sr_scorer=$("#fa-scorer").value; S._sr_champ=$("#fa-champ").value; toast("Fasit lagret ✓"); await loadState(); } else toast(r.error,true); };
   document.querySelectorAll('[data-res]').forEach(b=>b.onclick=async()=>{ const mid=+b.dataset.mid,res=b.dataset.res; try{ const r=res===""?await rpc("admin_clear_result",{p_admin_pin:adminPin,p_match_id:mid}):await rpc("admin_set_result",{p_admin_pin:adminPin,p_match_id:mid,p_result:res}); if(!r.ok) throw new Error(r.error); toast("Resultat lagret ✓"); await loadState(); renderMain(); }catch(e){ toast(cleanErr(e),true); } });
   document.querySelectorAll('[data-reset]').forEach(b=>b.onclick=async()=>{ const uname=b.dataset.reset,inp=b.closest('.user-row').querySelector('input'),np=inp?inp.value.trim():''; if(np.length<4){ toast("Ny PIN må ha minst 4 sifre",true); return; } const r=await rpc("admin_reset_pin",{p_admin_pin:adminPin,p_username:uname,p_new_pin:np}); if(r.ok){ if(inp) inp.value=''; toast("Ny PIN satt for "+uname+" ✓"); } else toast(cleanErr(new Error(r.error)),true); });
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ const uname=b.dataset.del; if(!confirm('Slette "'+uname+'"? Alle tipsene forsvinner.')) return; const r=await rpc("admin_delete_user",{p_admin_pin:adminPin,p_username:uname}); if(r.ok){ toast(uname+" slettet"); await loadAdminUsers(); await loadState(); renderMain(); } else toast(cleanErr(new Error(r.error)),true); });
 }
 async function loadAdminUsers(){ try{ const r=await rpc("admin_list_users",{p_admin_pin:adminPin}); adminUsers=(r&&r.ok)?r.users:[]; }catch(e){ adminUsers=[]; } }
-
 function authView(){
   return `<div class="wrap"><header style="border:none"><div class="inner" style="text-align:center"><h1 style="margin-top:6px">VM-<span class="hl">Konken</span></h1><div class="tagline" style="margin:0 auto">Tippekonkurranse for Allstad for VM 2026 🇺🇸🇨🇦🇲🇽</div></div></header>
     <div class="auth-screen"><div class="auth-card">
       <h2>${authMode==="login"?"Logg inn":"Lag bruker"}</h2>
-      <p class="s">${authMode==="login"?"Velkommen tilbake! Skriv inn brukernavn og PIN.":"Velg brukernavn og PIN-kode (minst 4 siffer). Husk PIN-en!"}</p>
+      <p class="s">${authMode==="login"?"Velkommen tilbake! Skriv inn brukernavn og PIN.":"Velg et brukernavn og en PIN-kode (minst 4 siffer). Husk PIN-en!"}</p>
       <div id="auth-err"></div>
       <div class="field"><label>Brukernavn</label><input id="au-name" autocomplete="username" placeholder="ola_nordmann"></div>
       <div class="field"><label>PIN-kode</label><input id="au-pin" type="password" inputmode="numeric" autocomplete="${authMode==="login"?"current-password":"new-password"}" placeholder="••••"></div>
@@ -520,7 +449,6 @@ function bindAuth(){
   go.onclick=submit;
   $("#au-pin").addEventListener("keydown",e=>{ if(e.key==="Enter") submit(); });
 }
-
 function cleanErr(e){ const m=(e&&e.message)||String(e); if(/Failed to fetch|NetworkError/i.test(m)) return "Nettverksfeil – sjekk internett og prøv igjen."; try{ const j=JSON.parse(m); if(j.message) return j.message; }catch(_){} return m.length>120?"Noe gikk galt. Prøv igjen.":m; }
 async function loadAndRender(){ try{ await loadState(); render(); }catch(e){ $("#app").innerHTML='<div class="empty">Kunne ikke laste data: '+esc(cleanErr(e))+'</div>'; } }
 loadAndRender();
