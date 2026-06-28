@@ -228,27 +228,51 @@ const HEADER_IMG = {
   tabell:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Norway_Italy_-_June_2025_C_46.jpg/1280px-Norway_Italy_-_June_2025_C_46.jpg",
   sluttspill:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/France_champion_of_the_Football_World_Cup_Russia_2018.jpg/1280px-France_champion_of_the_Football_World_Cup_Russia_2018.jpg"
 };
-function setHeaderBg(){ const el=document.getElementById("hbg"); if(!el) return; el.src=HEADER_IMG[view]||HEADER_IMG.kamper; el.style.display=""; }
-function heroBanner(kind){ const h=HERO[kind]; if(!h) return ""; const bg=h.photo?`<img class="art" src="${h.photo}" alt="" loading="lazy" onerror="this.style.display='none'">`:(h.art||""); return `<div class="hero">${bg}<div class="htext"><div class="k">${h.k}</div><div class="s">${h.s}</div></div></div>`; }
+function setHeaderBg(){ const el=document.getElementById("hbg"); if(!el) return; el.src = HEADER_IMG[view] || HEADER_IMG.kamper; el.style.display=""; }
+function heroBanner(kind){
+  const h=HERO[kind]; if(!h) return "";
+  const bg = h.photo ? `<img class="art" src="${h.photo}" alt="" loading="lazy" onerror="this.style.display='none'">` : (h.art||"");
+  return `<div class="hero">${bg}<div class="htext"><div class="k">${h.k}</div><div class="s">${h.s}</div></div></div>`;
+}
 const STAGE_NAMES = {group:"Gruppespill",r32:"16-delsfinale (32)",r16:"Åttedelsfinale",qf:"Kvartfinale",sf:"Semifinale",final:"Finale"};
 const ALL_STAGES = ["group","r32","r16","qf","sf","final"];
-let S=null,token=store.get("vmt_token"),view="kamper",authMode="login",adminPin=null,adminUsers=null;
-const $=sel=>document.querySelector(sel);
-function toast(msg,bad){ const t=$("#toast"); t.textContent=msg; t.className="show"+(bad?" bad":""); clearTimeout(t._t); t._t=setTimeout(()=>{ t.className=""; },2600); }
-function fmtDate(iso){ return new Date(iso).toLocaleString("nb-NO",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); }
-function nowMs(){ return S?new Date(S.now).getTime():Date.now(); }
-function isLocked(m){ if(m.finished) return true; if(!S.open_stages.includes(m.stage)) return true; return new Date(m.kickoff).getTime()<=nowMs(); }
+let S = null;
+let token = store.get("vmt_token");
+let view = "kamper";
+let authMode = "login";
+let adminPin = null;
+let adminUsers = null;
+let adminFlags = null;
+const $ = sel => document.querySelector(sel);
+function toast(msg, bad){
+  const t = $("#toast"); t.textContent = msg; t.className = "show" + (bad?" bad":"");
+  clearTimeout(t._t); t._t = setTimeout(()=>{ t.className=""; }, 2600);
+}
+function fmtDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleString("nb-NO",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+}
+function nowMs(){ return S ? new Date(S.now).getTime() : Date.now(); }
+function isLocked(m){
+  if(m.finished) return true;
+  if(!S.open_stages.includes(m.stage)) return true;
+  return new Date(m.kickoff).getTime() <= nowMs();
+}
 function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
-async function loadState(){ S=await rpc("get_state",{p_token:token||null}); if(token&&!S.me){ token=null; store.del("vmt_token"); } }
+async function loadState(){
+  S = await rpc("get_state", { p_token: token || null });
+  if(token && !S.me){ token=null; store.del("vmt_token"); }
+}
 function render(){
-  const app=$("#app");
-  if(!S){ app.innerHTML='<div class="loading"><div class="spin"></div></div>'; return; }
-  if(!S.me){ app.innerHTML=authView(); bindAuth(); return; }
-  app.innerHTML=headerView()+tabsView()+'<main class="wrap fade-in" id="main"></main>'+footerView();
+  const app = $("#app");
+  if(!S){ app.innerHTML = '<div class="loading"><div class="spin"></div></div>'; return; }
+  if(!S.me){ app.innerHTML = authView(); bindAuth(); return; }
+  app.innerHTML = headerView() + tabsView() + '<main class="wrap fade-in" id="main"></main>' + footerView();
   bindHeader(); bindTabs(); renderMain();
 }
 function footerView(){
-  return `<footer class="credits">Bilder via Wikimedia Commons:
+  return `<footer class="credits">
+    Bilder via Wikimedia Commons:
     <a href="https://commons.wikimedia.org/wiki/File:Maradona_shilton_mano_dios.jpg" target="_blank" rel="noopener">Maradona 1986 (PD)</a> ·
     <a href="https://commons.wikimedia.org/wiki/File:Germany_champions_2014_FIFA_World_Cup.jpg" target="_blank" rel="noopener">Tyskland 2014 (CC BY-SA)</a> ·
     <a href="https://commons.wikimedia.org/wiki/File:Norway_Italy_-_June_2025_C_46.jpg" target="_blank" rel="noopener">Norge–Italia 2025 (CC BY-SA)</a> ·
@@ -267,32 +291,42 @@ function headerView(){
       <h1>VM-<span class="hl">Konken</span></h1>
       <div class="tagline">Tippekonkurranse for Allstad for VM 2026</div>
       ${countdownView()}
-      <div class="userbar"><div class="who"><span class="dot"></span>${esc(S.me.username)}</div><button class="ghost" id="logout">Logg ut</button></div>
+      <div class="userbar">
+        <div class="who"><span class="dot"></span>${esc(S.me.username)}</div>
+        <button class="ghost" id="logout">Logg ut</button>
+      </div>
     </div>
   </header>`;
 }
 function countdownView(){
-  const diff=new Date(S.tournament_start).getTime()-nowMs();
-  if(diff<=0) return `<div class="countdown"><span class="cd-label">⚽ VM er i gang!</span></div>`;
-  const d=Math.floor(diff/864e5),h=Math.floor(diff%864e5/36e5),m=Math.floor(diff%36e5/6e4);
-  return `<div class="countdown"><div class="cd-box"><b>${d}</b><span>dager</span></div><div class="cd-box"><b>${h}</b><span>timer</span></div><div class="cd-box"><b>${m}</b><span>min</span></div><span class="cd-label">til avspark</span></div>`;
+  const diff = new Date(S.tournament_start).getTime() - nowMs();
+  if(diff <= 0) return `<div class="countdown"><span class="cd-label">⚽ VM er i gang!</span></div>`;
+  const d = Math.floor(diff/864e5), h=Math.floor(diff%864e5/36e5), m=Math.floor(diff%36e5/6e4);
+  return `<div class="countdown">
+    <div class="cd-box"><b>${d}</b><span>dager</span></div>
+    <div class="cd-box"><b>${h}</b><span>timer</span></div>
+    <div class="cd-box"><b>${m}</b><span>min</span></div>
+    <span class="cd-label">til avspark</span>
+  </div>`;
 }
 function tabsView(){
-  const tabs=[["kamper","Kamper"],["sluttspill","Sluttspill"],["bonus","Bonustips"],["tabell","Tabell"],["admin","Admin"]];
-  return `<nav class="tabs"><div class="inner">${tabs.map(([k,l])=>`<button class="tab" role="tab" data-tab="${k}" aria-selected="${view===k}">${l}</button>`).join("")}</div></nav>`;
+  const tabs = [["kamper","Kamper"],["sluttspill","Sluttspill"],["bonus","Bonustips"],["tabell","Tabell"],["admin","Admin"]];
+  return `<nav class="tabs"><div class="inner">${tabs.map(([k,l])=>
+    `<button class="tab" role="tab" data-tab="${k}" aria-selected="${view===k}">${l}</button>`).join("")}</div></nav>`;
 }
 function renderMain(){
-  const main=$("#main"); if(!main) return;
+  const main = $("#main"); if(!main) return;
   main.classList.remove("fade-in"); void main.offsetWidth; main.classList.add("fade-in");
-  if(view==="kamper") main.innerHTML=matchesView();
-  else if(view==="sluttspill") main.innerHTML=sluttspillView();
-  else if(view==="bonus") main.innerHTML=bonusView();
-  else if(view==="tabell") main.innerHTML=tabellView();
-  else if(view==="admin") main.innerHTML=adminView();
-  setHeaderBg(); bindMain();
+  if(view==="kamper") main.innerHTML = matchesView();
+  else if(view==="sluttspill") main.innerHTML = sluttspillView();
+  else if(view==="bonus") main.innerHTML = bonusView();
+  else if(view==="tabell") main.innerHTML = tabellView();
+  else if(view==="admin") main.innerHTML = adminView();
+  setHeaderBg();
+  bindMain();
 }
 function fmtDay(iso){
-  const d=new Date(iso),n=nowMs();
+  const d=new Date(iso), n=nowMs();
   if(d.toDateString()===new Date(n).toDateString()) return "I dag";
   if(d.toDateString()===new Date(n-864e5).toDateString()) return "I går";
   return d.toLocaleDateString("nb-NO",{weekday:"long",day:"numeric",month:"long"});
@@ -320,10 +354,14 @@ function matchesView(){
   return html;
 }
 function sluttspillView(){
-  const ko=(S.matches||[]).filter(m=>m.stage!=="group");
-  if(!ko.length) return heroBanner("sluttspill")+`<div class="empty">Sluttspillet starter snart!<br><br>Kom tilbake når gruppespillet er ferdig – her tipper du runde for runde hvem som går videre.</div>`;
-  let html=heroBanner("sluttspill");
-  ALL_STAGES.filter(s=>s!=="group").forEach(st=>{ const ms=ko.filter(m=>m.stage===st); if(!ms.length) return; html+=`<div class="section-title">${STAGE_NAMES[st]}</div>`; html+=ms.map(matchCard).join(""); });
+  const ko = (S.matches||[]).filter(m=>m.stage!=="group");
+  if(!ko.length) return heroBanner("sluttspill") + `<div class="empty">Sluttspillet starter snart!<br><br>Kom tilbake når gruppespillet er ferdig – her tippet du runde for runde hvem som går videre.</div>`;
+  let html = heroBanner("sluttspill");
+  ALL_STAGES.filter(s=>s!=="group").forEach(st=>{
+    const ms = ko.filter(m=>m.stage===st); if(!ms.length) return;
+    html += `<div class="section-title">${STAGE_NAMES[st]}</div>`;
+    html += ms.map(matchCard).join("");
+  });
   return html;
 }
 function matchCard(m){
@@ -342,68 +380,131 @@ function matchCard(m){
       <div class="result-tag" style="color:var(--muted)">⏳ Lagene er ikke klare ennå – kommer så snart forrige runde er avgjort</div>
     </div>`;
   }
-  const locked=isLocked(m),myPick=S.me.picks[String(m.id)]||null,isGroup=m.stage==="group";
+  const locked = isLocked(m);
+  const myPick = S.me.picks[String(m.id)] || null;
+  const isGroup = m.stage==="group";
+  const opts = isGroup
+    ? [["H","Hjemme"],["U","Uavgjort"],["B","Borte"]]
+    : [["home","Videre"],["away","Videre"]];
   let controls;
   if(isGroup){
-    controls=`<div class="huv">`+[["H","Hjemme"],["U","Uavgjort"],["B","Borte"]].map(([v,lab])=>{
-      const sel=myPick===v,isRes=m.finished&&m.result===v,correct=m.finished&&myPick===v&&m.result===v;
-      return `<button class="pick${isRes?' is-result':''}${correct?' correct':''}" data-mid="${m.id}" data-pick="${v}" aria-pressed="${sel}" ${locked?"disabled":""}><b>${v}</b><span>${lab}</span></button>`;
-    }).join("")+`</div>`;
+    controls = `<div class="huv">` + opts.map(([v,lab])=>{
+      const sel = myPick===v;
+      const isRes = m.finished && m.result===v;
+      const correct = m.finished && myPick===v && m.result===v;
+      return `<button class="pick${sel?'':''}${isRes?' is-result':''}${correct?' correct':''}" data-mid="${m.id}" data-pick="${v}"
+        aria-pressed="${sel}" ${locked?"disabled":""}><b>${v}</b><span>${lab}</span></button>`;
+    }).join("") + `</div>`;
   } else {
-    const mk=(val,team)=>{ const sel=myPick===val,isRes=m.finished&&m.result===val,correct=m.finished&&myPick===val&&m.result===val; return `<button class="pick${isRes?' is-result':''}${correct?' correct':''}" data-mid="${m.id}" data-pick="${val}" aria-pressed="${sel}" ${locked?"disabled":""}><b style="font-size:14px">${flag(team)}</b><span>${esc(team)}</span></button>`; };
-    controls=`<div class="huv" style="grid-template-columns:1fr 1fr">${mk("home",m.home_team)}${mk("away",m.away_team)}</div>`;
+    const mk = (val,team)=>{
+      const sel = myPick===val; const isRes=m.finished&&m.result===val; const correct=m.finished&&myPick===val&&m.result===val;
+      return `<button class="pick${isRes?' is-result':''}${correct?' correct':''}" data-mid="${m.id}" data-pick="${val}"
+        aria-pressed="${sel}" ${locked?"disabled":""}><b style="font-size:14px">${flag(team)}</b><span>${esc(team)}</span></button>`;
+    };
+    controls = `<div class="huv" style="grid-template-columns:1fr 1fr">${mk("home",m.home_team)}${mk("away",m.away_team)}</div>`;
   }
-  let resultTag="";
+  let resultTag = "";
   if(m.finished){
-    const won=m.result==="H"?m.home_team:m.result==="B"?m.away_team:m.result==="U"?"Uavgjort":m.result==="home"?m.home_team:m.away_team;
-    const got=myPick&&myPick===m.result;
-    resultTag=`<div class="result-tag">✓ Fasit: <b style="color:var(--text)">${esc(isGroup&&m.result==="U"?"Uavgjort":won)}</b><span class="pts">${got?("+"+m.points_value+" p"):"0 p"}</span></div>`;
+    const won = m.result==="H"?m.home_team:m.result==="B"?m.away_team:m.result==="U"?"Uavgjort":m.result==="home"?m.home_team:m.away_team;
+    const got = (myPick && myPick===m.result);
+    resultTag = `<div class="result-tag">✓ Fasit: <b style="color:var(--text)">${esc(isGroup&&m.result==="U"?"Uavgjort":won)}</b>
+      <span class="pts">${got?("+"+m.points_value+" p"):"0 p"}</span></div>`;
   }
-  let picksSummary="",picksDetail="";
+  let picksSummary = "", picksDetail = "";
   if(locked){
-    const allUsers=(S.leaderboard||[]).map(r=>r.username);
-    const matchPicks=(S.locked_picks||{})[String(m.id)]||{};
-    if(allUsers.length>0){
-      const counts={};
+    const allUsers = (S.leaderboard||[]).map(r=>r.username);
+    const matchPicks = (S.locked_picks||{})[String(m.id)] || {};
+    if(allUsers.length > 0){
+      const counts = {};
       Object.values(matchPicks).forEach(p=>{ counts[p]=(counts[p]||0)+1; });
-      const dKeys=isGroup?["H","U","B"]:["home","away"],dLabels=isGroup?["H","U","B"]:["Hjemme","Borte"];
-      const dist=dKeys.map((v,i)=>`<span class="pcnt pcnt-${v}">${dLabels[i]} ${counts[v]||0}</span>`).join("");
-      picksSummary=`<div class="picks-summary">${dist}<button class="see-picks-btn" data-mid="${m.id}">👥 Se svar</button></div>`;
-      const rows=allUsers.map(uname=>{ const pick=matchPicks[uname],isMe=S.me&&uname===S.me.username,meTag=isMe?` <span class="tagme">DEG</span>`:""; if(!pick) return `<div class="pick-row"><span>${esc(uname)}${meTag}</span><span class="notipped">ikke tippet</span></div>`; let label=pick,cls="ptag-"+pick; if(!isGroup){ label=pick==="home"?m.home_team:m.away_team; } if(m.finished&&pick===m.result) label+=" ✓"; return `<div class="pick-row"><span>${esc(uname)}${meTag}</span><span class="ptag ${cls}">${esc(label)}</span></div>`; }).join("");
-      picksDetail=`<div class="picks-detail" id="pd-${m.id}" style="display:none">${rows}</div>`;
+      const distrKeys = isGroup ? ["H","U","B"] : ["home","away"];
+      const distrLabels = isGroup ? ["H","U","B"] : ["Hjemme","Borte"];
+      const dist = distrKeys.map((v,i)=>`<span class="pcnt pcnt-${v}">${distrLabels[i]} ${counts[v]||0}</span>`).join("");
+      picksSummary = `<div class="picks-summary">${dist}<button class="see-picks-btn" data-mid="${m.id}">👥 Se svar</button></div>`;
+      const rows = allUsers.map(uname=>{
+        const pick = matchPicks[uname];
+        const isMe = S.me && uname===S.me.username;
+        const meTag = isMe?` <span class="tagme">DEG</span>`:"";
+        if(!pick) return `<div class="pick-row"><span>${esc(uname)}${meTag}</span><span class="notipped">ikke tippet</span></div>`;
+        let label=pick, cls="ptag-"+pick;
+        if(!isGroup){ label=pick==="home"?m.home_team:m.away_team; }
+        if(m.finished && pick===m.result) label+=" ✓";
+        return `<div class="pick-row"><span>${esc(uname)}${meTag}</span><span class="ptag ${cls}">${esc(label)}</span></div>`;
+      }).join("");
+      picksDetail = `<div class="picks-detail" id="pd-${m.id}" style="display:none">${rows}</div>`;
     }
   }
   return `<div class="match ${locked?'locked':''}">
     <div class="meta">
       <span style="display:flex;gap:6px;align-items:center">${fmtDate(m.kickoff)}${m.group_letter?`<span class="group-badge">Gr. ${m.group_letter}</span>`:''}</span>
-      ${locked&&!m.finished?'<span class="lock">🔒 Låst</span>':(m.points_value>1?`<span>${m.points_value} poeng</span>`:'')}
+      ${locked && !m.finished ? '<span class="lock">🔒 Låst</span>' : (m.points_value>1?`<span>${m.points_value} poeng</span>`:'')}
     </div>
-    <div class="teams"><div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div><div class="vs">VS</div><div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div></div>
-    ${controls}${resultTag}${picksSummary}${picksDetail}
+    <div class="teams">
+      <div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div>
+      <div class="vs">VS</div>
+      <div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div>
+    </div>
+    ${controls}
+    ${resultTag}
+    ${picksSummary}
+    ${picksDetail}
   </div>`;
 }
 function bonusView(){
-  const locked=S.specials_locked,sp=S.me.specials||{top_scorer:null,champion:null};
-  return heroBanner("bonus")+`
-  ${locked?`<div class="badge-lock">🔒 Fristen er passert – tipsene er låst</div>`:`<div class="badge-lock" style="background:rgba(47,196,107,.12);border-color:rgba(47,196,107,.45);color:var(--mint)">⏱ Frist: avspark 11. juni</div>`}
-  <div class="panel"><h3>⚽ Toppscorer</h3><p class="hint">Hvem blir VM-toppscorer? Riktig svar gir <b style="color:var(--lime)">5 poeng</b>.</p><div class="field"><input id="sc-scorer" placeholder="F.eks. Erling Haaland" value="${esc(sp.top_scorer||"")}" ${locked?"disabled":""}></div></div>
-  <div class="panel"><h3>🏆 VM-vinner</h3><p class="hint">Hvilket land løfter pokalen? Riktig svar gir <b style="color:var(--lime)">5 poeng</b>.</p><div class="field"><input id="sc-champ" placeholder="F.eks. Frankrike" value="${esc(sp.champion||"")}" ${locked?"disabled":""}></div></div>
+  const locked = S.specials_locked;
+  const sp = S.me.specials || {top_scorer:null,champion:null};
+  return heroBanner("bonus") + `
+  ${locked?`<div class="badge-lock">🔒 Fristen er passert – tipsene er låst</div>`
+          :`<div class="badge-lock" style="background:rgba(47,196,107,.12);border-color:rgba(47,196,107,.45);color:var(--mint)">⏱ Frist: avspark 11. juni</div>`}
+  <div class="panel">
+    <h3>⚽ Toppscorer</h3>
+    <p class="hint">Hvem blir VM-toppscorer? Riktig svar gir <b style="color:var(--lime)">5 poeng</b>.</p>
+    <div class="field"><input id="sc-scorer" placeholder="F.eks. Erling Haaland" value="${esc(sp.top_scorer||"")}" ${locked?"disabled":""}></div>
+  </div>
+  <div class="panel">
+    <h3>🏆 VM-vinner</h3>
+    <p class="hint">Hvilket land løfter pokalen? Riktig svar gir <b style="color:var(--lime)">5 poeng</b>.</p>
+    <div class="field"><input id="sc-champ" placeholder="F.eks. Frankrike" value="${esc(sp.champion||"")}" ${locked?"disabled":""}></div>
+  </div>
   ${locked?"":`<button class="btn" id="save-bonus">Lagre bonustips</button>`}`;
 }
 function tabellView(){
-  const lb=S.leaderboard||[];
-  if(!lb.length) return heroBanner("tabell")+`<div class="empty">Ingen poeng ennå – tabellen fylles når kampene er ferdig.</div>`;
-  return heroBanner("tabell")+`<div class="section-title">Stillingen</div>`+lb.map((r,i)=>{ const me=r.username===S.me.username,top=i<3?` top${i+1}`:""; return `<div class="lb-row${me?' me':''}${top}"><div class="lb-pos">${i+1}</div><div style="flex:1;min-width:0"><div class="lb-name">${esc(r.username)}${me?'<span class="tagme">DEG</span>':''}</div><div class="lb-sub">${r.correct} riktige tips</div></div><div class="lb-pts">${r.total_points}<small>POENG</small></div></div>`; }).join("");
+  const lb = S.leaderboard || [];
+  if(!lb.length) return heroBanner("tabell") + `<div class="empty">Ingen poeng ennå – tabellen fylles når kampene er ferdig.</div>`;
+  return heroBanner("tabell") + `<div class="section-title">Stillingen</div>` + lb.map((r,i)=>{
+    const me = r.username===S.me.username;
+    const top = i<3?` top${i+1}`:"";
+    return `<div class="lb-row${me?' me':''}${top}">
+      <div class="lb-pos">${i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div class="lb-name">${esc(r.username)}${me?'<span class="tagme">DEG</span>':''}</div>
+        <div class="lb-sub">${r.correct} riktige tips</div>
+      </div>
+      <div class="lb-pts">${r.total_points}<small>POENG</small></div>
+    </div>`;
+  }).join("");
 }
 function adminView(){
-  if(!adminPin) return `<div class="panel" style="max-width:420px;margin:30px auto"><h3>🔐 Adminside</h3><p class="hint">Skriv inn admin-PIN for å registrere resultater og styre rundene.</p><div id="adm-err"></div><div class="field"><input id="adm-pin" type="password" inputmode="numeric" placeholder="Admin-PIN"></div><button class="btn" id="adm-login">Logg inn som admin</button></div>`;
-  const matches=S.matches||[],stagesOpen=S.open_stages||[];
+  if(!adminPin){
+    return `<div class="panel" style="max-width:420px;margin:30px auto">
+      <h3>🔐 Adminside</h3>
+      <p class="hint">Skriv inn admin-PIN for å registrere resultater og styre rundene.</p>
+      <div id="adm-err"></div>
+      <div class="field"><input id="adm-pin" type="password" inputmode="numeric" placeholder="Admin-PIN"></div>
+      <button class="btn" id="adm-login">Logg inn som admin</button>
+    </div>`;
+  }
+  const matches = S.matches||[];
+  const stagesOpen = S.open_stages||[];
   return `
   <div class="section-title">Innstillinger</div>
   <div class="panel admin-tools">
     <p class="hint">Åpne eller lukk tipping per runde. Tips låses uansett automatisk ved avspark.</p>
-    <div class="row">${ALL_STAGES.map(st=>`<label class="chk"><input type="checkbox" data-stage="${st}" ${stagesOpen.includes(st)?"checked":""}> ${STAGE_NAMES[st]}</label>`).join("")}</div>
-    <div class="row" style="margin-top:6px"><label class="chk"><input type="checkbox" id="lock-sp" ${S.specials_locked?"checked":""}> Lås bonustips (toppscorer/vinner)</label></div>
+    <div class="row">${ALL_STAGES.map(st=>`
+      <label class="chk"><input type="checkbox" data-stage="${st}" ${stagesOpen.includes(st)?"checked":""}> ${STAGE_NAMES[st]}</label>`).join("")}</div>
+    <div class="row" style="margin-top:6px">
+      <label class="chk"><input type="checkbox" id="lock-sp" ${S.specials_locked?"checked":""}> Lås bonustips (toppscorer/vinner)</label>
+    </div>
     <div class="row" style="margin-top:14px">
       <input class="adm-input" id="np" type="password" placeholder="Ny admin-PIN" style="flex:1">
       <button class="ghost" id="change-pin">Bytt PIN</button>
@@ -413,84 +514,218 @@ function adminView(){
       <button class="ghost" id="fetch-now" style="border-color:rgba(47,196,107,.4);color:var(--lime);white-space:nowrap">Hent nå</button>
     </div>
   </div>
+
+  <div class="section-title">⚠️ Resultatvarsler</div>
+  <div class="panel admin-tools">
+    <p class="hint">En daglig sjekk klokken 08:00 sammenligner lagrede resultater mot API-et på nytt. Avvik vises her – ingenting overskrives automatisk.</p>
+    ${adminFlags===null ? '<div class="mini">Laster…</div>'
+      : (adminFlags.length===0 ? '<div class="mini">Ingen avvik funnet ✓</div>'
+      : adminFlags.map(f=>`
+      <div class="user-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap">
+        <div style="min-width:0"><b>${esc(f.home_team)} – ${esc(f.away_team)}</b><br><span class="mini">Lagret: ${esc(f.stored_result)} · API sier nå: ${esc(f.api_result)}</span></div>
+        <div class="row" style="margin:0;gap:6px">
+          <button class="ghost" data-flag-accept="${f.flag_id}" style="border-color:rgba(47,196,107,.4);color:var(--lime)">Godta API</button>
+          <button class="ghost" data-flag-keep="${f.flag_id}">Behold vårt</button>
+        </div>
+      </div>`).join(''))}
+  </div>
+
   <div class="section-title">Brukere</div>
   <div class="panel admin-tools">
     <p class="hint">Se hvem som er med, nullstill PIN for noen som har glemt sin, eller slett test-/feilbrukere.</p>
-    ${adminUsers===null?'<div class="mini">Laster…</div>':(adminUsers.length===0?'<div class="mini">Ingen brukere registrert ennå.</div>':adminUsers.map(u=>`<div class="user-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap"><div style="min-width:0"><b>${esc(u.username)}</b> <span class="mini">· ${u.picks} tips</span></div><div class="row" style="margin:0;gap:6px"><input class="adm-input" placeholder="Ny PIN" inputmode="numeric" style="width:92px"><button class="ghost" data-reset="${esc(u.username)}">Nullstill</button><button class="ghost" data-del="${esc(u.username)}" style="border-color:rgba(255,107,97,.4);color:var(--red)">Slett</button></div></div>`).join(''))}
+    ${adminUsers===null ? '<div class="mini">Laster…</div>'
+      : (adminUsers.length===0 ? '<div class="mini">Ingen brukere registrert ennå.</div>'
+      : adminUsers.map(u=>`
+      <div class="user-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap">
+        <div style="min-width:0"><b>${esc(u.username)}</b> <span class="mini">· ${u.picks} tips</span></div>
+        <div class="row" style="margin:0;gap:6px">
+          <input class="adm-input" placeholder="Ny PIN" inputmode="numeric" style="width:92px">
+          <button class="ghost" data-reset="${esc(u.username)}">Nullstill</button>
+          <button class="ghost" data-del="${esc(u.username)}" style="border-color:rgba(255,107,97,.4);color:var(--red)">Slett</button>
+        </div>
+      </div>`).join(''))}
   </div>
+
   <div class="section-title">Fasit: bonus</div>
   <div class="panel admin-tools">
     <div class="row"><input class="adm-input" id="fa-scorer" placeholder="Toppscorer (fasit)" style="flex:1" value="${esc(S._sr_scorer||"")}"></div>
     <div class="row"><input class="adm-input" id="fa-champ" placeholder="VM-vinner (fasit)" style="flex:1" value="${esc(S._sr_champ||"")}"></div>
     <button class="ghost" id="save-fasit">Lagre fasit</button>
   </div>
+
   <div class="section-title">Registrer resultater</div>
-  ${matches.length?matches.map(m=>{ const isGroup=m.stage==="group",cur=m.result,opts=isGroup?[["H","H"],["U","U"],["B","B"]]:[["home",m.home_team],["away",m.away_team]]; return `<div class="match"><div class="meta"><span>${STAGE_NAMES[m.stage]}${m.group_letter?" · Gr. "+m.group_letter:""} · ${fmtDate(m.kickoff)}</span>${m.finished?'<span style="color:var(--lime)">✓ ferdig</span>':''}</div><div class="teams"><div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div><div class="vs">VS</div><div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div></div><div class="seg" role="group">${opts.map(([v,lab])=>`<button data-res="${v}" data-mid="${m.id}" class="${cur===v?'on':''}">${esc(lab)}</button>`).join("")}<button data-res="" data-mid="${m.id}" class="${!cur?'on':''}">–</button></div></div>`; }).join(""):'<div class="empty">Ingen kamper lagt inn.</div>'}`;
+  ${matches.length?matches.map(m=>{
+    const isGroup=m.stage==="group";
+    const cur=m.result;
+    const opts = isGroup?[["H","H"],["U","U"],["B","B"]]:[["home",m.home_team],["away",m.away_team]];
+    return `<div class="match">
+      <div class="meta"><span>${STAGE_NAMES[m.stage]}${m.group_letter?(" · Gr. "+m.group_letter):""} · ${fmtDate(m.kickoff)}</span>${m.finished?'<span style="color:var(--lime)">✓ ferdig</span>':''}</div>
+      <div class="teams"><div class="team home"><span class="flag">${flag(m.home_team)}</span><span class="nm">${esc(m.home_team)}</span></div><div class="vs">VS</div><div class="team away"><span class="nm">${esc(m.away_team)}</span><span class="flag">${flag(m.away_team)}</span></div></div>
+      <div class="seg" role="group">
+        ${opts.map(([v,lab])=>`<button data-res="${v}" data-mid="${m.id}" class="${cur===v?'on':''}">${esc(lab)}</button>`).join("")}
+        <button data-res="" data-mid="${m.id}" class="${!cur?'on':''}">–</button>
+      </div>
+    </div>`;
+  }).join(""):'<div class="empty">Ingen kamper lagt inn.</div>'}`;
 }
-function bindHeader(){ const lo=$("#logout"); if(lo) lo.onclick=()=>{ token=null; store.del("vmt_token"); adminPin=null; loadAndRender(); }; }
-function bindTabs(){ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ view=b.dataset.tab; document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x.dataset.tab===view)); renderMain(); }); }
+function bindHeader(){
+  const lo=$("#logout"); if(lo) lo.onclick=()=>{ token=null; store.del("vmt_token"); adminPin=null; loadAndRender(); };
+}
+function bindTabs(){
+  document.querySelectorAll(".tab").forEach(b=> b.onclick=()=>{ view=b.dataset.tab; document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected", x.dataset.tab===view)); renderMain(); });
+}
 function bindMain(){
-  document.querySelectorAll(".pick:not([disabled])").forEach(b=>b.onclick=async()=>{
-    const mid=+b.dataset.mid,pick=b.dataset.pick,prev=S.me.picks[String(mid)];
-    S.me.picks[String(mid)]=pick; renderMain();
-    try{ const r=await rpc("save_pick",{p_token:token,p_match_id:mid,p_pick:pick}); if(!r.ok) throw new Error(r.error); toast("Tips lagret ✓"); }
-    catch(e){ S.me.picks[String(mid)]=prev; renderMain(); toast(cleanErr(e),true); }
+  document.querySelectorAll(".pick:not([disabled])").forEach(b=> b.onclick=async()=>{
+    const mid=+b.dataset.mid, pick=b.dataset.pick;
+    const prev = S.me.picks[String(mid)];
+    S.me.picks[String(mid)] = (prev===pick? prev : pick);
+    renderMain();
+    try{ const r=await rpc("save_pick",{p_token:token,p_match_id:mid,p_pick:pick});
+      if(!r.ok){ throw new Error(r.error); } toast("Tips lagret ✓");
+    }catch(e){ S.me.picks[String(mid)]=prev; renderMain(); toast(cleanErr(e),true); }
   });
-  const sb=$("#save-bonus"); if(sb) sb.onclick=async()=>{ sb.disabled=true; try{ const r=await rpc("save_specials",{p_token:token,p_top_scorer:$("#sc-scorer").value,p_champion:$("#sc-champ").value}); if(!r.ok) throw new Error(r.error); toast("Bonustips lagret ✓"); await loadState(); }catch(e){ toast(cleanErr(e),true); } sb.disabled=false; renderMain(); };
+  const sb=$("#save-bonus"); if(sb) sb.onclick=async()=>{
+    sb.disabled=true;
+    try{ const r=await rpc("save_specials",{p_token:token,p_top_scorer:$("#sc-scorer").value,p_champion:$("#sc-champ").value});
+      if(!r.ok) throw new Error(r.error); toast("Bonustips lagret ✓"); await loadState();
+    }catch(e){ toast(cleanErr(e),true);} sb.disabled=false; renderMain();
+  };
   const tog=$("#toggle-older");
-  if(tog) tog.onclick=()=>{ const box=$("#older-matches"); if(!box) return; const open=box.style.display!=="none"; box.style.display=open?"none":"block"; tog.textContent=open?`▸ Vis ${tog.dataset.count} eldre kamper`:`▾ Skjul eldre kamper`; };
-  document.querySelectorAll(".see-picks-btn").forEach(b=>b.onclick=e=>{ e.stopPropagation(); const detail=document.getElementById("pd-"+b.dataset.mid); if(!detail) return; const open=detail.style.display!=="none"; detail.style.display=open?"none":"block"; b.textContent=open?"👥 Se svar":"👆 Skjul"; });
+  if(tog) tog.onclick=()=>{
+    const box=$("#older-matches"); if(!box) return;
+    const open=box.style.display!=="none";
+    box.style.display=open?"none":"block";
+    tog.textContent=open?`▸ Vis ${tog.dataset.count} eldre kamper`:`▾ Skjul eldre kamper`;
+  };
+  document.querySelectorAll(".see-picks-btn").forEach(b=> b.onclick=e=>{
+    e.stopPropagation();
+    const detail=document.getElementById("pd-"+b.dataset.mid); if(!detail) return;
+    const open=detail.style.display!=="none";
+    detail.style.display=open?"none":"block";
+    b.textContent=open?"👥 Se svar":"👆 Skjul";
+  });
   bindAdmin();
 }
 function bindAdmin(){
-  const al=$("#adm-login"); if(al) al.onclick=async()=>{ const pin=$("#adm-pin").value; try{ const r=await rpc("admin_set_open_stages",{p_admin_pin:pin,p_stages:S.open_stages}); if(!r.ok){ $("#adm-err").innerHTML='<div class="err">'+esc(r.error)+'</div>'; return; } adminPin=pin; await loadAdminUsers(); renderMain(); toast("Innlogget som admin ✓"); }catch(e){ $("#adm-err").innerHTML='<div class="err">'+esc(cleanErr(e))+'</div>'; } };
+  const al=$("#adm-login"); if(al) al.onclick=async()=>{
+    const pin=$("#adm-pin").value;
+    try{ const r=await rpc("admin_set_open_stages",{p_admin_pin:pin,p_stages:S.open_stages});
+      if(!r.ok){ $("#adm-err").innerHTML='<div class="err">'+esc(r.error)+'</div>'; return; }
+      adminPin=pin; await loadAdminUsers(); await loadAdminFlags(); renderMain(); toast("Innlogget som admin ✓");
+    }catch(e){ $("#adm-err").innerHTML='<div class="err">'+esc(cleanErr(e))+'</div>'; }
+  };
   if(!adminPin) return;
-  document.querySelectorAll('[data-stage]').forEach(c=>c.onchange=async()=>{ const stages=[...document.querySelectorAll('[data-stage]:checked')].map(x=>x.dataset.stage); const r=await rpc("admin_set_open_stages",{p_admin_pin:adminPin,p_stages:stages}); if(r.ok){ S.open_stages=stages; toast("Lagret ✓"); } else toast(r.error,true); });
-  const ls=$("#lock-sp"); if(ls) ls.onchange=async()=>{ const r=await rpc("admin_lock_specials",{p_admin_pin:adminPin,p_locked:ls.checked}); if(r.ok){ toast("Lagret ✓"); await loadState(); renderMain(); } else toast(r.error,true); };
-  const cp=$("#change-pin"); if(cp) cp.onclick=async()=>{ const np=$("#np").value; const r=await rpc("admin_change_pin",{p_admin_pin:adminPin,p_new_pin:np}); if(r.ok){ adminPin=np; toast("Admin-PIN endret ✓"); } else toast(r.error,true); };
+  document.querySelectorAll('[data-stage]').forEach(c=> c.onchange=async()=>{
+    const stages=[...document.querySelectorAll('[data-stage]:checked')].map(x=>x.dataset.stage);
+    const r=await rpc("admin_set_open_stages",{p_admin_pin:adminPin,p_stages:stages});
+    if(r.ok){ S.open_stages=stages; toast("Lagret ✓"); } else toast(r.error,true);
+  });
+  const ls=$("#lock-sp"); if(ls) ls.onchange=async()=>{
+    const r=await rpc("admin_lock_specials",{p_admin_pin:adminPin,p_locked:ls.checked});
+    if(r.ok){ toast("Lagret ✓"); await loadState(); renderMain(); } else toast(r.error,true);
+  };
+  const cp=$("#change-pin"); if(cp) cp.onclick=async()=>{
+    const np=$("#np").value; const r=await rpc("admin_change_pin",{p_admin_pin:adminPin,p_new_pin:np});
+    if(r.ok){ adminPin=np; toast("Admin-PIN endret ✓"); } else toast(r.error,true);
+  };
   const fn=$("#fetch-now"); if(fn) fn.onclick=async()=>{
     fn.disabled=true; fn.textContent="Henter…";
-    try{ const r=await fetch("https://gqdnxnzpyrmtuumfjofp.supabase.co/functions/v1/fetch-results",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}); const d=await r.json(); if(d.ok){ toast(d.updated>0?`✓ ${d.updated} resultat(er) oppdatert`:"Ingen nye resultater ennå"); if(d.updated>0){ await loadState(); renderMain(); } } else toast(d.error||"Feil ved henting",true); }catch(e){ toast(cleanErr(e),true); }
+    try{
+      const r=await fetch("https://gqdnxnzpyrmtuumfjofp.supabase.co/functions/v1/fetch-results",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+      const d=await r.json();
+      if(d.ok){ toast(d.updated>0?`✓ ${d.updated} resultat(er) oppdatert`:"Ingen nye resultater ennå"); if(d.updated>0){ await loadState(); renderMain(); } }
+      else toast(d.error||"Feil ved henting",true);
+    }catch(e){ toast(cleanErr(e),true); }
     fn.disabled=false; fn.textContent="Hent nå";
   };
-  const sf=$("#save-fasit"); if(sf) sf.onclick=async()=>{ const r=await rpc("admin_set_specials_result",{p_admin_pin:adminPin,p_top_scorer:$("#fa-scorer").value,p_champion:$("#fa-champ").value}); if(r.ok){ S._sr_scorer=$("#fa-scorer").value; S._sr_champ=$("#fa-champ").value; toast("Fasit lagret ✓"); await loadState(); } else toast(r.error,true); };
-  document.querySelectorAll('[data-res]').forEach(b=>b.onclick=async()=>{ const mid=+b.dataset.mid,res=b.dataset.res; try{ const r=res===""?await rpc("admin_clear_result",{p_admin_pin:adminPin,p_match_id:mid}):await rpc("admin_set_result",{p_admin_pin:adminPin,p_match_id:mid,p_result:res}); if(!r.ok) throw new Error(r.error); toast("Resultat lagret ✓"); await loadState(); renderMain(); }catch(e){ toast(cleanErr(e),true); } });
-  document.querySelectorAll('[data-reset]').forEach(b=>b.onclick=async()=>{ const uname=b.dataset.reset,inp=b.closest('.user-row').querySelector('input'),np=inp?inp.value.trim():''; if(np.length<4){ toast("Ny PIN må ha minst 4 sifre",true); return; } const r=await rpc("admin_reset_pin",{p_admin_pin:adminPin,p_username:uname,p_new_pin:np}); if(r.ok){ if(inp) inp.value=''; toast("Ny PIN satt for "+uname+" ✓"); } else toast(cleanErr(new Error(r.error)),true); });
-  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ const uname=b.dataset.del; if(!confirm('Slette "'+uname+'"? Alle tipsene forsvinner.')) return; const r=await rpc("admin_delete_user",{p_admin_pin:adminPin,p_username:uname}); if(r.ok){ toast(uname+" slettet"); await loadAdminUsers(); await loadState(); renderMain(); } else toast(cleanErr(new Error(r.error)),true); });
+  const sf=$("#save-fasit"); if(sf) sf.onclick=async()=>{
+    const r=await rpc("admin_set_specials_result",{p_admin_pin:adminPin,p_top_scorer:$("#fa-scorer").value,p_champion:$("#fa-champ").value});
+    if(r.ok){ S._sr_scorer=$("#fa-scorer").value; S._sr_champ=$("#fa-champ").value; toast("Fasit lagret ✓"); await loadState(); } else toast(r.error,true);
+  };
+  document.querySelectorAll('[data-res]').forEach(b=> b.onclick=async()=>{
+    const mid=+b.dataset.mid, res=b.dataset.res;
+    try{
+      const r = res==="" ? await rpc("admin_clear_result",{p_admin_pin:adminPin,p_match_id:mid})
+                         : await rpc("admin_set_result",{p_admin_pin:adminPin,p_match_id:mid,p_result:res});
+      if(!r.ok) throw new Error(r.error);
+      toast("Resultat lagret ✓"); await loadState(); renderMain();
+    }catch(e){ toast(cleanErr(e),true); }
+  });
+  document.querySelectorAll('[data-reset]').forEach(b=> b.onclick=async()=>{
+    const uname=b.dataset.reset;
+    const inp=b.closest('.user-row').querySelector('input');
+    const np=inp?inp.value.trim():'';
+    if(np.length<4){ toast("Ny PIN må ha minst 4 sifre",true); return; }
+    const r=await rpc("admin_reset_pin",{p_admin_pin:adminPin,p_username:uname,p_new_pin:np});
+    if(r.ok){ if(inp) inp.value=''; toast("Ny PIN satt for "+uname+" ✓"); } else toast(cleanErr(new Error(r.error)),true);
+  });
+  document.querySelectorAll('[data-del]').forEach(b=> b.onclick=async()=>{
+    const uname=b.dataset.del;
+    if(!confirm('Slette brukeren "'+uname+'"? Alle tipsene deres forsvinner. Dette kan ikke angres.')) return;
+    const r=await rpc("admin_delete_user",{p_admin_pin:adminPin,p_username:uname});
+    if(r.ok){ toast(uname+" slettet"); await loadAdminUsers(); await loadState(); renderMain(); } else toast(cleanErr(new Error(r.error)),true);
+  });
+  document.querySelectorAll('[data-flag-accept]').forEach(b=> b.onclick=async()=>{
+    const id=+b.dataset.flagAccept;
+    const r=await rpc("admin_resolve_flag",{p_admin_pin:adminPin,p_flag_id:id,p_accept_api:true});
+    if(r.ok){ toast("Resultat oppdatert til API-verdi ✓"); await loadAdminFlags(); await loadState(); renderMain(); } else toast(cleanErr(new Error(r.error)),true);
+  });
+  document.querySelectorAll('[data-flag-keep]').forEach(b=> b.onclick=async()=>{
+    const id=+b.dataset.flagKeep;
+    const r=await rpc("admin_resolve_flag",{p_admin_pin:adminPin,p_flag_id:id,p_accept_api:false});
+    if(r.ok){ toast("Beholdt vårt resultat ✓"); await loadAdminFlags(); renderMain(); } else toast(cleanErr(new Error(r.error)),true);
+  });
 }
-async function loadAdminUsers(){ try{ const r=await rpc("admin_list_users",{p_admin_pin:adminPin}); adminUsers=(r&&r.ok)?r.users:[]; }catch(e){ adminUsers=[]; } }
+async function loadAdminUsers(){
+  try{ const r=await rpc("admin_list_users",{p_admin_pin:adminPin}); adminUsers = (r&&r.ok)? r.users : []; }
+  catch(e){ adminUsers=[]; }
+}
+async function loadAdminFlags(){
+  try{ const r=await rpc("admin_get_flags",{p_admin_pin:adminPin}); adminFlags = (r&&r.ok)? r.flags : []; }
+  catch(e){ adminFlags=[]; }
+}
 function authView(){
-  return `<div class="wrap"><header style="border:none"><div class="inner" style="text-align:center"><h1 style="margin-top:6px">VM-<span class="hl">Konken</span></h1><div class="tagline" style="margin:0 auto">Tippekonkurranse for Allstad for VM 2026 🇺🇸🇨🇦🇲🇽</div></div></header>
+  return `<div class="wrap"><header style="border:none"><div class="inner" style="text-align:center">
+      <h1 style="margin-top:6px">VM-<span class="hl">Konken</span></h1>
+      <div class="tagline" style="margin:0 auto">Tippekonkurranse for Allstad for VM 2026 🇺🇸🇨🇦🇲🇽</div>
+    </div></header>
     <div class="auth-screen"><div class="auth-card">
       <h2>${authMode==="login"?"Logg inn":"Lag bruker"}</h2>
-      <p class="s">${authMode==="login"?"Velkommen tilbake! Skriv inn brukernavn og PIN.":"Velg et brukernavn og en PIN-kode (minst 4 siffer). Husk PIN-en!"}</p>
+      <p class="s">${authMode==="login"?"Velkommen tilbake! Skriv inn brukernavn og PIN.":"Velg et brukernavn og en PIN-kode (minst 4 siffer). Husk PIN-en – den er nøkkelen din."}</p>
       <div id="auth-err"></div>
       <div class="field"><label>Brukernavn</label><input id="au-name" autocomplete="username" placeholder="ola_nordmann"></div>
       <div class="field"><label>PIN-kode</label><input id="au-pin" type="password" inputmode="numeric" autocomplete="${authMode==="login"?"current-password":"new-password"}" placeholder="••••"></div>
       <button class="btn" id="au-go">${authMode==="login"?"Logg inn":"Opprett bruker"}</button>
-      <div class="switcher">${authMode==="login"?"Ny her?":"Har du bruker?"} <button id="au-switch">${authMode==="login"?"Lag bruker":"Logg inn"}</button></div>
+      <div class="switcher">${authMode==="login"?"Ny her?":"Har du bruker?"}
+        <button id="au-switch">${authMode==="login"?"Lag bruker":"Logg inn"}</button></div>
     </div></div></div>`;
 }
 function bindAuth(){
   $("#au-switch").onclick=()=>{ authMode=authMode==="login"?"register":"login"; render(); };
   const go=$("#au-go");
   const submit=async()=>{
-    const name=$("#au-name").value.trim(),pin=$("#au-pin").value;
-    if(!name||!pin){ $("#auth-err").innerHTML='<div class="err">Fyll inn brukernavn og PIN.</div>'; return; }
+    const name=$("#au-name").value.trim(), pin=$("#au-pin").value;
+    if(!name||!pin){ $("#auth-err").innerHTML='<div class="err">Fyll inn både brukernavn og PIN.</div>'; return; }
     go.disabled=true; go.textContent="Et øyeblikk…";
     try{
       const r=await rpc(authMode==="login"?"login":"register",{p_username:name,p_pin:pin});
       if(!r.ok){ $("#auth-err").innerHTML='<div class="err">'+esc(r.error)+'</div>'; go.disabled=false; go.textContent=authMode==="login"?"Logg inn":"Opprett bruker"; return; }
-      token=r.token; store.set("vmt_token",token); view="kamper"; await loadAndRender(); toast("Hei, "+r.username+"! 👋");
+      token=r.token; store.set("vmt_token",token); view="kamper"; await loadAndRender();
+      toast("Hei, "+r.username+"! 👋");
     }catch(e){ $("#auth-err").innerHTML='<div class="err">'+esc(cleanErr(e))+'</div>'; go.disabled=false; go.textContent=authMode==="login"?"Logg inn":"Opprett bruker"; }
   };
   go.onclick=submit;
   $("#au-pin").addEventListener("keydown",e=>{ if(e.key==="Enter") submit(); });
 }
-function cleanErr(e){ const m=(e&&e.message)||String(e); if(/Failed to fetch|NetworkError/i.test(m)) return "Nettverksfeil – sjekk internett og prøv igjen."; try{ const j=JSON.parse(m); if(j.message) return j.message; }catch(_){} return m.length>120?"Noe gikk galt. Prøv igjen.":m; }
+function cleanErr(e){
+  const m=(e&&e.message)||String(e);
+  if(/Failed to fetch|NetworkError/i.test(m)) return "Nettverksfeil – sjekk internett og prøv igjen.";
+  try{ const j=JSON.parse(m); if(j.message) return j.message; }catch(_){}
+  return m.length>120? "Noe gikk galt. Prøv igjen." : m;
+}
 async function loadAndRender(){ try{ await loadState(); render(); }catch(e){ $("#app").innerHTML='<div class="empty">Kunne ikke laste data: '+esc(cleanErr(e))+'</div>'; } }
 loadAndRender();
-setInterval(()=>{ if(S&&S.me){ const c=document.querySelector(".countdown"); if(c) c.outerHTML=countdownView(); } },30000);
+setInterval(()=>{ if(S&&S.me){ const c=document.querySelector(".countdown"); if(c) c.outerHTML=countdownView(); } }, 30000);
 </script>
 </body>
 </html>
