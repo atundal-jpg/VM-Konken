@@ -354,14 +354,26 @@ function matchesView(){
   return html;
 }
 function sluttspillView(){
-  const ko = (S.matches||[]).filter(m=>m.stage!=="group");
+  const ko = (S.matches||[]).filter(m=>m.stage!=="group").sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
   if(!ko.length) return heroBanner("sluttspill") + `<div class="empty">Sluttspillet starter snart!<br><br>Kom tilbake når gruppespillet er ferdig – her tippet du runde for runde hvem som går videre.</div>`;
+  const cutoff=nowMs()-24*60*60*1000;
+  const old=ko.filter(m=>new Date(m.kickoff).getTime()<cutoff);
+  const active=ko.filter(m=>new Date(m.kickoff).getTime()>=cutoff);
+  const stageBlocks=(list)=>{
+    let out="";
+    ALL_STAGES.filter(s=>s!=="group").forEach(st=>{
+      const ms = list.filter(m=>m.stage===st); if(!ms.length) return;
+      out += `<div class="section-title">${STAGE_NAMES[st]}</div>`;
+      out += ms.map(matchCard).join("");
+    });
+    return out;
+  };
   let html = heroBanner("sluttspill");
-  ALL_STAGES.filter(s=>s!=="group").forEach(st=>{
-    const ms = ko.filter(m=>m.stage===st); if(!ms.length) return;
-    html += `<div class="section-title">${STAGE_NAMES[st]}</div>`;
-    html += ms.map(matchCard).join("");
-  });
+  html += stageBlocks(active.length?active:ko);
+  if(old.length && active.length){
+    html += `<button class="older-toggle" id="toggle-older" data-count="${old.length}">▸ Vis ${old.length} eldre kamper</button>`;
+    html += `<div id="older-matches" style="display:none">${stageBlocks(old)}</div>`;
+  }
   return html;
 }
 function matchCard(m){
