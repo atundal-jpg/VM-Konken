@@ -483,11 +483,17 @@ function bonusView(){
 function tabellView(){
   const lb = S.leaderboard || [];
   if(!lb.length) return heroBanner("tabell") + `<div class="empty">Ingen poeng ennå – tabellen fylles når kampene er ferdig.</div>`;
+  // Delt plassering ved lik poengsum: to på 64 poeng blir begge nr. 1,
+  // nestemann på 63 poeng blir nr. 3 (ikke nr. 2) — vanlig idrettsrangering.
+  const ranks = lb.map((r,i)=> (i>0 && r.total_points===lb[i-1].total_points) ? null : i+1);
+  for(let i=1;i<ranks.length;i++){ if(ranks[i]===null) ranks[i]=ranks[i-1]; }
   return heroBanner("tabell") + `<div class="section-title">Stillingen</div>` + lb.map((r,i)=>{
     const me = r.username===S.me.username;
-    const top = i<3?` top${i+1}`:"";
+    const rank = ranks[i];
+    const tied = (i>0 && r.total_points===lb[i-1].total_points) || (i<lb.length-1 && r.total_points===lb[i+1].total_points);
+    const top = rank<=3?` top${rank}`:"";
     return `<div class="lb-row${me?' me':''}${top}">
-      <div class="lb-pos">${i+1}</div>
+      <div class="lb-pos">${tied?'=':''}${rank}</div>
       <div style="flex:1;min-width:0">
         <div class="lb-name">${esc(r.username)}${me?'<span class="tagme">DEG</span>':''}</div>
         <div class="lb-sub">${r.correct} riktige tips</div>
